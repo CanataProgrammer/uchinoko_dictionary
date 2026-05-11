@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- ▼ キャラクター名に変える -->
+  <title>キャラクター名 — うちの子まとめ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fdf8f5;
+      --bg-card: #ffffff;
+      --bg-surface: #f5efe9;
+      --text-primary: #2a1f1a;
+      --text-secondary: #7a6058;
+      --text-muted: #b09a90;
+      --accent: #c97d6a;
+      --accent-light: #f0d5cc;
+      --accent-dark: #9a5a49;
+      --border: rgba(180, 140, 120, 0.25);
+      --border-hover: rgba(180, 140, 120, 0.5);
+      --tag-bg: #f5e8e3;
+      --tag-text: #9a5a49;
+      --tag-border: rgba(201, 125, 106, 0.35);
+      --shadow-sm: 0 1px 3px rgba(80,40,20,0.07);
+      --shadow-md: 0 4px 16px rgba(80,40,20,0.10);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Zen Kaku Gothic New', sans-serif;
+      --font-serif: 'Shippori Mincho', serif;
+      --content-width: 780px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1310;
+        --bg-card: #231a16;
+        --bg-surface: #2c201a;
+        --text-primary: #f0e4dc;
+        --text-secondary: #b89a8e;
+        --text-muted: #7a5e55;
+        --accent: #d4907c;
+        --accent-light: #3d2218;
+        --accent-dark: #f0b8a5;
+        --border: rgba(180, 120, 90, 0.2);
+        --border-hover: rgba(180, 120, 90, 0.45);
+        --tag-bg: #2e1f18;
+        --tag-text: #d4907c;
+        --tag-border: rgba(212, 144, 124, 0.3);
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    /* ─── Back Link ─── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 1rem 1.5rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link svg { width: 14px; height: 14px; }
+
+    /* ─── Hero ─── */
+    .hero {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 580px) {
+      .hero { flex-direction: column; align-items: center; text-align: center; }
+    }
+
+    .hero-image-wrap {
+      flex-shrink: 0;
+      width: 220px;
+    }
+
+    @media (max-width: 580px) { .hero-image-wrap { width: 180px; } }
+
+    /* ▼ メイン画像（アイコン・バストアップなど） */
+    .hero-image {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      display: block;
+      background: var(--bg-surface);
+    }
+
+    .hero-info { flex: 1; min-width: 0; padding-top: 0.5rem; }
+
+    /* ▼ 世界名・所属 */
+    .hero-world {
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    /* ▼ キャラクター名 */
+    .hero-name {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ▼ 読み仮名 */
+    .hero-reading {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    /* ▼ タグ */
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.2rem; }
+
+    .hero-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 100px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
+    }
+
+    /* ▼ 短い紹介文（一言） */
+    .hero-short-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      padding-left: 0.75rem;
+      border-left: 2px solid var(--accent-light);
+    }
+
+    /* ─── Basic Stats Table ─── */
+    .content { max-width: var(--content-width); margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+    .section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+      letter-spacing: 0.06em;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .stats-table tr { border-bottom: 1px solid var(--border); }
+    .stats-table tr:last-child { border-bottom: none; }
+
+    .stats-table th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 0.55rem 0.75rem 0.55rem 0;
+      width: 8em;
+      vertical-align: top;
+    }
+
+    .stats-table td {
+      color: var(--text-primary);
+      padding: 0.55rem 0;
+      vertical-align: top;
+      line-height: 1.7;
+    }
+
+    /* ─── Free Text ─── */
+    .prose {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      line-height: 1.9;
+      white-space: pre-wrap;
+    }
+
+    .prose p { margin-bottom: 0.8em; }
+
+    /* ─── Image Gallery ─── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .gallery-item {
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-caption {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.3rem;
+    }
+
+    /* ─── Lightbox ─── */
+    .lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      cursor: pointer;
+    }
+
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: var(--radius-sm); object-fit: contain; }
+
+    /* ─── Relation Cards ─── */
+    .relation-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .relation-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.9rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .relation-item:hover { border-color: var(--border-hover); }
+
+    .relation-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg-card);
+    }
+
+    .relation-info { flex: 1; min-width: 0; }
+
+    .relation-name {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .relation-label {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Footer ─── */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- 戻るリンク（index.htmlのパスをここから見た相対パスに合わせる） -->
+<a class="back-link" href="../../index.html">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+  一覧に戻る
+</a>
+
+<!-- ═══════════════════════════════════════════
+     HERO セクション
+     ▼ name / reading / world / tags / short_description / 画像 を編集する
+     ═══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-image-wrap">
+    <!-- ▼ メイン画像 src を変える。なければこのimgタグを消してOK -->
+    <img class="hero-image" src="../../assets/chars/char-id/main.jpg" alt="キャラクター名" />
+  </div>
+
+  <div class="hero-info">
+    <!-- ▼ 所属世界 -->
+    <div class="hero-world">サンプルワールド</div>
+
+    <!-- ▼ キャラクター名 -->
+    <h1 class="hero-name">キャラクター名</h1>
+
+    <!-- ▼ 読み仮名 / サブ表記 -->
+    <div class="hero-reading">きゃらくたーな / Character Name</div>
+
+    <!-- ▼ タグ (worlds.json の tags と合わせる) -->
+    <div class="hero-tags">
+      <span class="hero-tag">元気</span>
+      <span class="hero-tag">主人公</span>
+      <span class="hero-tag">人間</span>
+    </div>
+
+    <!-- ▼ 一言紹介 -->
+    <p class="hero-short-desc">
+      このキャラクターの一言紹介を書きます。世界観や立ち位置が伝わるような短い文章がおすすめです。
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CONTENT セクション
+     ═══════════════════════════════════════════ -->
+<div class="content">
+
+  <!-- ──────────────────────────────
+       基本情報（スペック表）
+       不要な行は削除してOK
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">基本情報</h2>
+    <table class="stats-table">
+      <tbody>
+        <tr><th>年齢</th><td>XX歳</td></tr>
+        <tr><th>身長</th><td>XXXcm</td></tr>
+        <tr><th>体重</th><td>XXkg</td></tr>
+        <tr><th>誕生日</th><td>○月○日</td></tr>
+        <tr><th>性別</th><td>女性 / 男性 / その他</td></tr>
+        <tr><th>種族</th><td>人間 / 獣人 など</td></tr>
+        <tr><th>出身</th><td>○○地方</td></tr>
+        <!-- ▼ 自由に行を追加できます -->
+        <tr><th>職業</th><td>魔法使い</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ──────────────────────────────
+       性格・特徴
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">性格・特徴</h2>
+    <div class="prose">
+性格の説明をここに書きます。
+
+箇条書きや改行なども自由に使えます。
+・明るくて前向き
+・でも不器用なところもある
+
+複数の段落に分けて書いてもOKです。
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────
+       背景・設定・来歴
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">背景・設定</h2>
+    <div class="prose">
+キャラクターの来歴や世界観における立ち位置などを書きます。
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────
+       デザインメモ・備考
+       不要なら丸ごと削除
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">デザインメモ</h2>
+    <div class="prose">
+髪色、瞳の色、衣装の特徴などデザイン上のメモを書きます。
+NGポイントや注意事項もここに。
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────
+       イラストギャラリー
+       src・alt を画像ごとに変える
+       クリックで拡大表示できます
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">イラスト</h2>
+    <div class="gallery-grid">
+
+      <!-- ▼ 1枚ごとにこのブロックをコピーして増やす -->
+      <div>
+        <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)">
+          <img src="../../assets/chars/char-id/illust01.jpg" alt="イラスト1" loading="lazy" />
+        </div>
+        <div class="gallery-caption">キャプション（任意）</div>
+      </div>
+
+      <div>
+        <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)">
+          <img src="../../assets/chars/char-id/illust02.jpg" alt="イラスト2" loading="lazy" />
+        </div>
+        <div class="gallery-caption"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────
+       関係キャラクター
+       href・サムネ・名前・関係を変える
+       不要なら丸ごと削除
+       ────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">関係するキャラクター</h2>
+    <div class="relation-list">
+
+      <!-- ▼ 1人ごとにこのブロックをコピーして増やす -->
+      <a class="relation-item" href="char-sample-02.html">
+        <!-- サムネなければ img ごと削除 -->
+        <img class="relation-thumb" src="../../assets/chars/char-sample-02/thumb.jpg" alt="キャラB" />
+        <div class="relation-info">
+          <div class="relation-name">キャラクターB</div>
+          <div class="relation-label">幼なじみ / ライバル など関係を書く</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+</div><!-- /content -->
+
+<!-- ─── Lightbox ─── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示" />
+</div>
+
+<footer class="site-footer">
+  <p>うちの子まとめ — All characters &amp; worlds are original creations.</p>
+</footer>
+
+<script>
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

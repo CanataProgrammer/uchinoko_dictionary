@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>うちの子まとめ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fdf8f5;
+      --bg-card: #ffffff;
+      --bg-surface: #f5efe9;
+      --text-primary: #2a1f1a;
+      --text-secondary: #7a6058;
+      --text-muted: #b09a90;
+      --accent: #c97d6a;
+      --accent-light: #f0d5cc;
+      --accent-dark: #9a5a49;
+      --border: rgba(180, 140, 120, 0.25);
+      --border-hover: rgba(180, 140, 120, 0.5);
+      --tag-bg: #f5e8e3;
+      --tag-text: #9a5a49;
+      --tag-border: rgba(201, 125, 106, 0.35);
+      --tag-active-bg: #c97d6a;
+      --tag-active-text: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(80,40,20,0.07);
+      --shadow-md: 0 4px 16px rgba(80,40,20,0.10);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Zen Kaku Gothic New', sans-serif;
+      --font-serif: 'Shippori Mincho', serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1310;
+        --bg-card: #231a16;
+        --bg-surface: #2c201a;
+        --text-primary: #f0e4dc;
+        --text-secondary: #b89a8e;
+        --text-muted: #7a5e55;
+        --accent: #d4907c;
+        --accent-light: #3d2218;
+        --accent-dark: #f0b8a5;
+        --border: rgba(180, 120, 90, 0.2);
+        --border-hover: rgba(180, 120, 90, 0.45);
+        --tag-bg: #2e1f18;
+        --tag-text: #d4907c;
+        --tag-border: rgba(212, 144, 124, 0.3);
+        --tag-active-bg: #d4907c;
+        --tag-active-text: #1a1310;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      }
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    /* ─── Header ─── */
+    .site-header {
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .site-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ─── Controls ─── */
+    .controls {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .select-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--text-muted);
+      pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      appearance: none;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 2.5rem 0.6rem 1rem;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:hover, select:focus { border-color: var(--border-hover); }
+
+    .tag-filter-toggle {
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .tag-filter-toggle:hover { border-color: var(--border-hover); color: var(--text-primary); }
+    .tag-filter-toggle.active { border-color: var(--accent); color: var(--accent); }
+
+    .tag-filter-toggle svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ─── Tag Panel ─── */
+    .tag-panel {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .tag-panel.open {
+      max-height: 200px;
+      padding: 0.75rem 1.5rem;
+    }
+
+    .tag-panel-inner {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+    }
+
+    .tag-panel-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.6rem;
+    }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .tag-chip {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .tag-chip:hover { border-color: var(--accent); }
+
+    .tag-chip.active {
+      background: var(--tag-active-bg);
+      color: var(--tag-active-text);
+      border-color: var(--tag-active-bg);
+    }
+
+    .tag-clear {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      font-family: var(--font-sans);
+      align-self: center;
+    }
+    .tag-clear:hover { color: var(--accent); }
+
+    /* ─── World Info ─── */
+    .world-info {
+      max-width: 900px;
+      margin: 1.25rem auto 0;
+      padding: 0 1.5rem;
+      display: none;
+    }
+
+    .world-info.visible { display: block; }
+
+    .world-info-inner {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+    }
+
+    .world-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .world-thumb-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-light);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .world-thumb-placeholder svg { width: 28px; height: 28px; color: var(--accent); }
+
+    .world-text { flex: 1; min-width: 0; }
+
+    .world-name {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .world-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── Grid ─── */
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .result-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .char-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ─── Character Card ─── */
+    .char-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .char-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-hover);
+    }
+
+    .char-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .char-thumb-wrap {
+      aspect-ratio: 3 / 4;
+      background: var(--bg-surface);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .char-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .char-card:hover .char-thumb { transform: scale(1.03); }
+
+    .char-thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .char-thumb-placeholder svg { width: 40px; height: 40px; opacity: 0.4; }
+
+    .char-info { padding: 0.6rem 0.75rem 0.75rem; }
+
+    .char-name {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+    }
+
+    .char-reading {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .char-tags-mini { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+
+    .char-tag-mini {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+    }
+
+    /* ─── Empty State ─── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg { width: 48px; height: 48px; margin: 0 auto 1rem; opacity: 0.3; display: block; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ─── Footer ─── */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+    }
+
+    /* ─── Fade in ─── */
+    .char-card { animation: fadeUp 0.25s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1 class="site-title">うちの子まとめ</h1>
+  <p class="site-subtitle">Original Characters</p>
+</header>
+
+<div class="controls">
+  <div class="select-wrapper">
+    <select id="world-select" aria-label="世界を選択">
+      <option value="">― 世界を選択してください ―</option>
+    </select>
+  </div>
+  <button class="tag-filter-toggle" id="tag-toggle" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+      <line x1="7" y1="7" x2="7.01" y2="7"/>
+    </svg>
+    タグで絞り込む
+  </button>
+</div>
+
+<div class="tag-panel" id="tag-panel" aria-hidden="true">
+  <div class="tag-panel-inner">
+    <div class="tag-panel-label">タグを選択（複数可）</div>
+    <div class="tag-list" id="tag-list"></div>
+    <button class="tag-clear" id="tag-clear" style="display:none">× クリア</button>
+  </div>
+</div>
+
+<div class="world-info" id="world-info">
+  <div class="world-info-inner" id="world-info-inner"></div>
+</div>
+
+<main class="main">
+  <div class="result-meta" id="result-meta" style="display:none"></div>
+  <div id="char-grid-wrap">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      <p>世界を選択するとキャラクターが表示されます</p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>うちの子まとめ — All characters &amp; worlds are original creations.</p>
+</footer>
+
+<script>
+  const worldSelect = document.getElementById('world-select');
+  const tagToggle   = document.getElementById('tag-toggle');
+  const tagPanel    = document.getElementById('tag-panel');
+  const tagListEl   = document.getElementById('tag-list');
+  const tagClear    = document.getElementById('tag-clear');
+  const worldInfo   = document.getElementById('world-info');
+  const worldInfoInner = document.getElementById('world-info-inner');
+  const gridWrap    = document.getElementById('char-grid-wrap');
+  const resultMeta  = document.getElementById('result-meta');
+
+  let allData = null;
+  let activeTags = new Set();
+  let currentWorld = null;
+
+  fetch('data/worlds.json')
+    .then(r => r.json())
+    .then(data => {
+      allData = data;
+      buildWorldSelect(data.worlds);
+      buildTagPanel(data.all_tags || []);
+      readUrlState();
+    })
+    .catch(() => {
+      gridWrap.innerHTML = '<div class="empty-state"><p>データの読み込みに失敗しました。worlds.json を確認してください。</p></div>';
+    });
+
+  function buildWorldSelect(worlds) {
+    worlds.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.id;
+      opt.textContent = w.name;
+      worldSelect.appendChild(opt);
+    });
+  }
+
+  function buildTagPanel(tags) {
+    tagListEl.innerHTML = '';
+    tags.forEach(tag => {
+      const chip = document.createElement('button');
+      chip.className = 'tag-chip';
+      chip.textContent = tag;
+      chip.addEventListener('click', () => toggleTag(tag, chip));
+      tagListEl.appendChild(chip);
+    });
+  }
+
+  function toggleTag(tag, chip) {
+    if (activeTags.has(tag)) { activeTags.delete(tag); chip.classList.remove('active'); }
+    else { activeTags.add(tag); chip.classList.add('active'); }
+    tagClear.style.display = activeTags.size > 0 ? 'inline' : 'none';
+    renderGrid();
+    updateUrl();
+  }
+
+  tagClear.addEventListener('click', () => {
+    activeTags.clear();
+    document.querySelectorAll('.tag-chip.active').forEach(c => c.classList.remove('active'));
+    tagClear.style.display = 'none';
+    renderGrid();
+    updateUrl();
+  });
+
+  tagToggle.addEventListener('click', () => {
+    const open = tagPanel.classList.toggle('open');
+    tagToggle.classList.toggle('active', open);
+    tagToggle.setAttribute('aria-expanded', open);
+    tagPanel.setAttribute('aria-hidden', !open);
+  });
+
+  worldSelect.addEventListener('change', () => {
+    const wid = worldSelect.value;
+    currentWorld = wid ? allData.worlds.find(w => w.id === wid) : null;
+    renderWorldInfo();
+    renderGrid();
+    updateUrl();
+  });
+
+  function renderWorldInfo() {
+    if (!currentWorld) { worldInfo.classList.remove('visible'); return; }
+    worldInfo.classList.add('visible');
+    const thumbHtml = currentWorld.thumbnail
+      ? `<img class="world-thumb" src="${currentWorld.thumbnail}" alt="${currentWorld.name}" />`
+      : `<div class="world-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>`;
+    worldInfoInner.innerHTML = `
+      ${thumbHtml}
+      <div class="world-text">
+        <div class="world-name">${esc(currentWorld.name)}</div>
+        <div class="world-desc">${esc(currentWorld.description || '')}</div>
+      </div>`;
+  }
+
+  function renderGrid() {
+    if (!currentWorld) {
+      resultMeta.style.display = 'none';
+      gridWrap.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>世界を選択するとキャラクターが表示されます</p></div>';
+      return;
+    }
+
+    let chars = currentWorld.characters || [];
+
+    if (activeTags.size > 0) {
+      chars = chars.filter(c => [...activeTags].every(t => (c.tags||[]).includes(t)));
+    }
+
+    resultMeta.style.display = 'block';
+    resultMeta.textContent = `${chars.length} 人のキャラクター${activeTags.size > 0 ? '（タグで絞り込み中）' : ''}`;
+
+    if (chars.length === 0) {
+      gridWrap.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>該当するキャラクターがいません</p></div>';
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'char-grid';
+
+    chars.forEach((c, i) => {
+      const card = document.createElement('a');
+      card.className = 'char-card';
+      card.href = c.detail_page || '#';
+      card.style.animationDelay = `${i * 0.04}s`;
+      card.setAttribute('aria-label', c.name);
+
+      const thumbHtml = c.thumbnail
+        ? `<img class="char-thumb" src="${c.thumbnail}" alt="${esc(c.name)}" loading="lazy" />`
+        : `<div class="char-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>`;
+
+      const tagsHtml = (c.tags||[]).slice(0,3).map(t =>
+        `<span class="char-tag-mini">${esc(t)}</span>`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="char-thumb-wrap">${thumbHtml}</div>
+        <div class="char-info">
+          <div class="char-name">${esc(c.name)}</div>
+          ${c.reading ? `<div class="char-reading">${esc(c.reading)}</div>` : ''}
+          ${tagsHtml ? `<div class="char-tags-mini">${tagsHtml}</div>` : ''}
+        </div>`;
+
+      grid.appendChild(card);
+    });
+
+    gridWrap.innerHTML = '';
+    gridWrap.appendChild(grid);
+  }
+
+  function updateUrl() {
+    const params = new URLSearchParams();
+    if (currentWorld) params.set('world', currentWorld.id);
+    if (activeTags.size > 0) params.set('tags', [...activeTags].join(','));
+    const url = params.toString() ? `?${params}` : location.pathname;
+    history.replaceState(null, '', url);
+  }
+
+  function readUrlState() {
+    const params = new URLSearchParams(location.search);
+    const wid = params.get('world');
+    const tags = params.get('tags');
+    if (wid) {
+      worldSelect.value = wid;
+      currentWorld = allData.worlds.find(w => w.id === wid) || null;
+    }
+    if (tags) {
+      tags.split(',').forEach(t => {
+        activeTags.add(t);
+        const chip = [...tagListEl.querySelectorAll('.tag-chip')].find(c => c.textContent === t);
+        if (chip) chip.classList.add('active');
+      });
+      tagClear.style.display = activeTags.size > 0 ? 'inline' : 'none';
+    }
+    renderWorldInfo();
+    renderGrid();
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

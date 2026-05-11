@@ -1,0 +1,33 @@
+{
+  "worlds": [
+    {
+      "id": "world-sample",
+      "name": "サンプルワールド",
+      "description": "これはサンプルの世界です。worlds.jsonを編集して自分の世界を追加してください。",
+      "thumbnail": "",
+      "characters": [
+        {
+          "id": "char-sample-01",
+          "name": "サンプルキャラ",
+          "reading": "さんぷるきゃら",
+          "thumbnail": "",
+          "tags": ["元気", "主人公", "人間"],
+          "short_description": "これはサンプルキャラクターです。character.htmlを参考に詳細ページを作成してください。",
+          "detail_page": "characters/char-sample-01.html"
+        }
+      ]
+    }
+  ],
+  "all_tags": [
+    "元気",
+    "クール",
+    "ツンデレ",
+    "おっとり",
+    "主人公",
+    "人間",
+    "獣人",
+    "魔法使い",
+    "戦士",
+    "幼なじみ"
+  ]
+}
