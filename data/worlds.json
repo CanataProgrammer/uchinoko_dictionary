@@ -11,7 +11,7 @@
           "id": "canata",
           "name": "□□ 彼方",
           "reading": "はてな かなた",
-          "thumbnail": "../assets/fabotus/canata.png",
+          "thumbnail": "assets/fabotus/canata.png",
           "tags": ["神人", "主人公", "能力持ち", "重要人物"],
           "short_description": "全てを持つもの。全てを観察するもの。",
           "detail_page": "characters/fabotus/canata.html"
