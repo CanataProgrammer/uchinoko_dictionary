@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>うちの子まとめ</title>
+  <title>彼方の世界 設定資料集</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -38,22 +38,23 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1a1310;
-        --bg-card: #231a16;
-        --bg-surface: #2c201a;
-        --text-primary: #f0e4dc;
-        --text-secondary: #b89a8e;
-        --text-muted: #7a5e55;
-        --accent: #d4907c;
-        --accent-light: #3d2218;
-        --accent-dark: #f0b8a5;
-        --border: rgba(180, 120, 90, 0.2);
-        --border-hover: rgba(180, 120, 90, 0.45);
-        --tag-bg: #2e1f18;
-        --tag-text: #d4907c;
-        --tag-border: rgba(212, 144, 124, 0.3);
-        --tag-active-bg: #d4907c;
-        --tag-active-text: #1a1310;
+        --bg: #fafafa;
+        --bg-card: #c3c3c3;
+        --bg-surface: #c3c3c3;
+        --text-primary: #181818;
+        --text-secondary: #323232;
+        --text-muted: #323232;
+        --accent: #c3c3c3;
+        --link: rgb(71, 80, 211);
+        --accent-light: #181818;
+        --accent-dark: #c3c3c3;
+        --border: rgba(180, 180, 180, 0.2);
+        --border-hover: rgba(173, 173, 173, 0.45);
+        --tag-bg: #232323;
+        --tag-text: #d0d0d0;
+        --tag-border: rgba(213, 213, 213, 0.3);
+        --tag-active-bg: #d3d3d3;
+        --tag-active-text: #191919;
         --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
         --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
       }
@@ -416,13 +417,12 @@
 <body>
 
 <header class="site-header">
-  <h1 class="site-title">うちの子まとめ</h1>
-  <p class="site-subtitle">Original Characters</p>
+  <h1 class="site-title">彼方の世界(8626番地) 設定資料集</h1>
 </header>
 
 <div class="controls">
   <div class="select-wrapper">
-    <select id="world-select" aria-label="世界を選択">
+    <select id="world-select" aria-label="世界選択">
       <option value="">― 世界を選択してください ―</option>
     </select>
   </div>
@@ -437,7 +437,7 @@
 
 <div class="tag-panel" id="tag-panel" aria-hidden="true">
   <div class="tag-panel-inner">
-    <div class="tag-panel-label">タグを選択（複数可）</div>
+    <div class="tag-panel-label">タグを選択</div>
     <div class="tag-list" id="tag-list"></div>
     <button class="tag-clear" id="tag-clear" style="display:none">× クリア</button>
   </div>
@@ -461,7 +461,7 @@
 </main>
 
 <footer class="site-footer">
-  <p>うちの子まとめ — All characters &amp; worlds are original creations.</p>
+  <p>Created by CanataZer0</p>
 </footer>
 
 <script>
@@ -548,12 +548,18 @@
     const thumbHtml = currentWorld.thumbnail
       ? `<img class="world-thumb" src="${currentWorld.thumbnail}" alt="${currentWorld.name}" />`
       : `<div class="world-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>`;
-    worldInfoInner.innerHTML = `
-      ${thumbHtml}
-      <div class="world-text">
-        <div class="world-name">${esc(currentWorld.name)}</div>
-        <div class="world-desc">${esc(currentWorld.description || '')}</div>
-      </div>`;
+worldInfoInner.innerHTML = `
+  ${thumbHtml}
+  <div class="world-text">
+    <div class="world-name">${esc(currentWorld.name)}</div>
+    <div class="world-desc">${esc(currentWorld.description || '')}</div>
+    ${currentWorld.detail_page
+      ? `<a href="${esc(currentWorld.detail_page)}" style="display:inline-flex;align-items:center;gap:0.35rem;margin-top:0.6rem;font-size:0.8rem;color:var(--link);text-decoration:none;">
+           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+           世界の詳細設定を見る
+         </a>`
+      : ''}
+  </div>`;
   }
 
   function renderGrid() {

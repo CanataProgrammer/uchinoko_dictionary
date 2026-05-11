@@ -1,33 +1,38 @@
 {
   "worlds": [
-    {
-      "id": "world-sample",
-      "name": "サンプルワールド",
-      "description": "これはサンプルの世界です。worlds.jsonを編集して自分の世界を追加してください。",
+        {
+      "id": "fabotus",
+      "name": "ファボトス",
+      "description": "幻想郷とキヴォトス、２つが混じりし時、世界は混沌へと包まれた。",
+      "detail_page": "worlds/fabotus.html",
       "thumbnail": "",
       "characters": [
         {
-          "id": "char-sample-01",
-          "name": "サンプルキャラ",
-          "reading": "さんぷるきゃら",
-          "thumbnail": "",
-          "tags": ["元気", "主人公", "人間"],
-          "short_description": "これはサンプルキャラクターです。character.htmlを参考に詳細ページを作成してください。",
-          "detail_page": "characters/char-sample-01.html"
+          "id": "canata",
+          "name": "□□ 彼方",
+          "reading": "はてな かなた",
+          "thumbnail": "../assets/fabotus/canata.png",
+          "tags": ["神人", "主人公", "能力持ち", "重要人物"],
+          "short_description": "全てを持つもの。全てを観察するもの。",
+          "detail_page": "characters/fabotus/canata.html"
         }
       ]
     }
   ],
+  
   "all_tags": [
-    "元気",
-    "クール",
-    "ツンデレ",
-    "おっとり",
     "主人公",
     "人間",
-    "獣人",
-    "魔法使い",
-    "戦士",
-    "幼なじみ"
+    "新世代人類",
+    "能力持ち",
+    "都市人",
+    "重要人物",
+    "神人",
+    "概念",
+    "魔力",
+    "魔素",
+    "魔源",
+    "キヴォトス人",
+    "異界体"
   ]
 }
