@@ -15,6 +15,15 @@
           "tags": ["神人", "主人公", "能力持ち", "重要人物"],
           "short_description": "全てを持つもの。全てを観察するもの。",
           "detail_page": "characters/fabotus/canata.html"
+        },
+        {
+          "id": "nagi_n",
+          "name": "心風 凪(冒険者)",
+          "reading": "こころかぜ なぎ",
+          "thumbnail": "assets/fabotus/nagi.png",
+          "tags": ["新人類", "主人公", "能力持ち", "重要人物", "魔素"],
+          "short_description": "戦闘狂、彼方大好き",
+          "detail_page": "characters/fabotus/canata.html"
         }
       ]
     }
