@@ -2,7 +2,8 @@
    管理画面（admin.html）
    ・ID / パスワードでログイン
    ・世界・キャラクターの追加 / 編集 / 削除、タグ一覧の編集、画像のアップロード
-   ・保存すると GitHub のリポジトリ（data/worlds.json）へ直接コミットする
+   ・保存すると GitHub のリポジトリへ直接コミットする
+     （data/worlds.json と、Discord・X の埋め込み用の共有ページ s/… を 1 回のコミットで）
    ═══════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -32,7 +33,7 @@
 
   const state = {
     data: null,      // GitHub 上の最新データ
-    sha: null,       // data/worlds.json の sha（上書き保存に必要）
+    sha: null,       // data/worlds.json の sha（別の場所での更新に気づくため）
     edit: null,      // 編集中の内容
     dirty: false,    // 未保存の変更があるか
     hash: location.hash,
@@ -212,13 +213,70 @@
     state.sha = f.sha;
   }
 
-  async function putData(next, message) {
-    const text = JSON.stringify(next, null, 2) + '\n';
-    const res = await gh(`contents/${R.dataPath}`, {
-      method: 'PUT',
-      body: { message, content: toB64(new TextEncoder().encode(text)), sha: state.sha, branch: R.branch }
+  const utf8 = text => new TextEncoder().encode(text);
+
+  /* git が付けるファイルの sha（中身が変わっていないファイルは書き直さないため） */
+  async function blobSha(text) {
+    const body = utf8(text);
+    const head = utf8(`blob ${body.length}\u0000`);
+    const all = new Uint8Array(head.length + body.length);
+    all.set(head);
+    all.set(body, head.length);
+    return hex(await crypto.subtle.digest('SHA-1', all));
+  }
+
+  /* 保存するファイルの一覧（パス → 中身）：data/worlds.json と、すべての世界・キャラの共有用ページ。
+     以前の URL（characters/…, worlds/…）のページが残っていれば、それも同じ中身で更新する */
+  function siteFiles(next, existing) {
+    const files = new Map([[R.dataPath, JSON.stringify(next, null, 2) + '\n']]);
+    const add = (wid, cid) => {
+      const html = CZ.sharePage(next, wid, cid);
+      files.set(CZ.sharePath(wid, cid), html);
+      if (existing.has(CZ.legacyPath(wid, cid))) files.set(CZ.legacyPath(wid, cid), html);
+    };
+    next.worlds.forEach(w => {
+      add(w.id);
+      (w.characters || []).forEach(c => add(w.id, c.id));
     });
-    state.sha = res.content.sha;
+    return files;
+  }
+
+  /* data/worlds.json と共有用ページを、1 回のコミットにまとめて保存する（Git Data API）
+     共有用フォルダ（s/）にある、もう存在しない世界・キャラのページは削除する */
+  async function putData(next, message) {
+    const ref = await gh(`git/ref/heads/${R.branch}`);
+    const parent = ref.object.sha;
+    const base = (await gh(`git/commits/${parent}`)).tree.sha;
+    const tree = await gh(`git/trees/${base}?recursive=1`);
+    const existing = new Map(tree.tree.filter(t => t.type === 'blob').map(t => [t.path, t.sha]));
+    if (existing.get(R.dataPath) !== state.sha) {
+      const e = new Error(ghMessage(409));
+      e.status = 409;
+      throw e;
+    }
+
+    const files = siteFiles(next, existing);
+    const changes = [];
+    let dataSha = state.sha;
+    for (const [path, text] of files) {
+      const sha = await blobSha(text);
+      if (path === R.dataPath) dataSha = sha;
+      if (existing.get(path) === sha) continue;
+      const blob = await gh('git/blobs', { method: 'POST', body: { content: toB64(utf8(text)), encoding: 'base64' } });
+      changes.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+    for (const path of existing.keys()) {
+      if (path.startsWith(CZ.SHARE_DIR) && path.endsWith('.html') && !files.has(path)) {
+        changes.push({ path, mode: '100644', type: 'blob', sha: null });
+      }
+    }
+    if (!changes.length) return;
+
+    const newTree = await gh('git/trees', { method: 'POST', body: { base_tree: base, tree: changes } });
+    const commit = await gh('git/commits', { method: 'POST', body: { message, tree: newTree.sha, parents: [parent] } });
+    // 途中で別のコミットが入っていたら 422 になる（上書きはしない）
+    await gh(`git/refs/heads/${R.branch}`, { method: 'PATCH', body: { sha: commit.sha, force: false } });
+    state.sha = dataSha;
   }
 
   async function uploadImage(file, folder) {
@@ -592,7 +650,7 @@
   }
 
   /* ═══════════ 編集画面の共通枠 ═══════════ */
-  function panel({ crumbs, title, viewHref, onDelete, onSave, sections }) {
+  function panel({ crumbs, title, viewHref, shareUrl, onDelete, onSave, sections }) {
     editor.innerHTML = '';
     const titleEl = h('h1', { class: 'editor-title' }, title || '（名前未設定）');
     const saveBtn = h('button', { type: 'button', class: 'btn-pill', 'data-save': '保存する', onclick: onSave }, '保存する');
@@ -602,6 +660,12 @@
         titleEl,
         h('div', { class: 'btn-row' },
           viewHref ? h('a', { class: 'btn-small btn-ghost', href: viewHref }, 'ページを見る') : null,
+          shareUrl ? h('button', {
+            type: 'button', class: 'btn-small btn-ghost', title: shareUrl,
+            onclick: async () => toast(await CZ.copyText(shareUrl)
+              ? '共有用URLをコピーしました。Discord・X に貼ると名前と画像が表示されます。'
+              : `コピーできませんでした：${shareUrl}`, 'info')
+          }, '共有用URLをコピー') : null,
           onDelete ? h('button', { type: 'button', class: 'btn-small is-danger', onclick: onDelete }, '削除') : null)),
       ...sections.map(([heading, help, ...fields]) => h('section', { class: 'editor-section' },
         h('h2', { class: 'editor-section-title' }, heading),
@@ -724,6 +788,7 @@
       crumbs: [h('a', { href: `#world/${encodeURIComponent(wid)}` }, world.name), ' ／ ', cid ? 'キャラクターを編集' : 'キャラクターを追加'],
       title: draft.name,
       viewHref: cid ? CZ.charUrl(wid, cid) : null,
+      shareUrl: cid ? CZ.shareUrl(wid, cid) : null,
       onDelete: cid ? remove : null,
       onSave: save,
       sections: [
@@ -813,6 +878,7 @@
       crumbs: [wid ? '世界を編集' : '世界を追加'],
       title: draft.name,
       viewHref: wid ? CZ.worldUrl(wid) : null,
+      shareUrl: wid ? CZ.shareUrl(wid) : null,
       onDelete: wid ? remove : null,
       onSave: save,
       sections: [
@@ -891,7 +957,8 @@
           h('li', {}, 'このブラウザでは保存した内容がすぐに表示されます。'),
           h('li', {}, '画像は「画像をアップロード」を押すとすぐ GitHub に送られます。そのあと「保存する」でページに反映されます。'),
           h('li', {}, '文章では、行の先頭に「# 」で小見出し、**文字** で太字になります。'),
-          h('li', {}, 'ログイン中は、公開ページの右下に「このページを編集」ボタンが出ます。'))));
+          h('li', {}, 'ログイン中は、公開ページの右下に「このページを編集」ボタンが出ます。'),
+          h('li', {}, 'Discord や X に貼るときは「共有用URLをコピー」の URL を使うと、キャラ名・紹介文・画像が埋め込み表示されます（保存のたびに自動で更新されます）。'))));
   }
 
   function missing() {

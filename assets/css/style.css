@@ -1061,6 +1061,30 @@ button { font: inherit; color: inherit; }
   .hero-image-wrap { width: min(70%, 260px); }
 }
 
+/* 共有用URLをコピー */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.4rem;
+  padding: 0.45rem 0.95rem;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  animation: fadeUp 0.6s var(--ease) both;
+  animation-delay: 1.3s;
+}
+
+.share-btn svg { width: 1em; height: 1em; flex-shrink: 0; }
+.share-btn:hover { color: var(--ink); border-color: var(--ink); }
+.share-btn.is-done { color: var(--take); border-color: var(--take); }
+.page-world .share-btn { display: flex; width: fit-content; }
+
 /* ─── Content ─── */
 .content {
   max-width: var(--content-width);

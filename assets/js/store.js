@@ -9,7 +9,9 @@
     owner: 'CanataProgrammer',
     name: 'uchinoko_dictionary',
     branch: 'main',
-    dataPath: 'data/worlds.json'
+    dataPath: 'data/worlds.json',
+    // 公開サイトの URL（埋め込み表示の画像などは絶対 URL で書く必要がある）
+    siteUrl: 'https://canataprogrammer.github.io/uchinoko_dictionary/'
   };
 
   const CACHE_KEY = 'cz-data-cache';
@@ -67,7 +69,95 @@
     return h ? `<strong class="prose-heading">${inline(h[1])}</strong>` : inline(line);
   }).join('\n');
 
-  CZ.PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+  /* ─── 共有用ページ（Discord・X の埋め込み表示用） ───
+     world.html / character.html は JavaScript で中身を描くため、JavaScript を実行しない
+     Discord などには名前も画像も見えない。そこで OGP だけを書いた静的ページを
+     s/世界ID.html・s/世界ID/キャラID.html に置き（管理画面で保存するたびに作り直す）、
+     開いた人は本来のページへ自動で移動させる */
+  CZ.SHARE_DIR = 's/';
+  CZ.sharePath = (wid, cid) => cid ? `${CZ.SHARE_DIR}${wid}/${cid}.html` : `${CZ.SHARE_DIR}${wid}.html`;
+  CZ.shareUrl = (wid, cid) => CZ.repo.siteUrl + CZ.sharePath(wid, cid);
+  // 以前の URL（同じ中身で更新し続ける）
+  CZ.legacyPath = (wid, cid) => cid ? `characters/${wid}/${cid}.html` : `worlds/${wid}.html`;
+
+  const SITE_NAME = '彼方の世界 設定資料集';
+  const absUrl = p => /^https?:\/\//i.test(p) ? p : CZ.repo.siteUrl + encodeURI(String(p).replace(/^\.?\//, ''));
+  const oneLine = (s, max) => {
+    const t = String(s || '').replace(/\s+/g, ' ').trim();
+    return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+  };
+
+  /* 共有用ページの HTML（世界 / キャラが見つからなければ null） */
+  CZ.sharePage = (data, wid, cid) => {
+    const w = CZ.findWorld(data, wid);
+    const c = cid ? CZ.findChar(data, wid, cid) : null;
+    if (!w || (cid && !c)) return null;
+    const title = c ? c.name : w.name;
+    const desc = oneLine(c
+      ? c.short_description || c.catch || `${w.name} のキャラクター`
+      : w.description || w.catch || `${w.name} の世界設定`, 160);
+    const img = c ? c.thumbnail || c.image : w.banner || w.thumbnail;
+    const root = cid ? '../../' : '../';
+    const target = c ? CZ.charUrl(wid, cid) : CZ.worldUrl(wid);
+    const e = CZ.esc;
+    const image = img
+      ? `  <meta property="og:image" content="${e(absUrl(img))}" />
+  <meta property="og:image:alt" content="${e(c ? `${title}のイラスト` : title)}" />`
+      : `  <meta property="og:image" content="${e(absUrl('assets/brand/og-image.png'))}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="城・神社と鳥居・大都市のシルエットに「彼方の世界、設定資料集。」の文字" />`;
+    return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${e(title)} | ${SITE_NAME}</title>
+  <!-- 共有用ページ（管理画面で保存すると自動で作り直されます。直接編集しないでください）
+       Discord・X などの埋め込み表示のための情報だけを置き、開いた人は本来のページに移動します -->
+  <link rel="icon" href="${root}favicon.ico" sizes="any" />
+  <link rel="icon" href="${root}assets/brand/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="${root}assets/brand/apple-touch-icon.png" />
+  <meta name="theme-color" content="#c8442e" />
+  <meta name="description" content="${e(desc)}" />
+  <meta property="og:type" content="${c ? 'profile' : 'website'}" />
+  <meta property="og:site_name" content="${SITE_NAME}" />
+  <meta property="og:title" content="${e(title)}" />
+  <meta property="og:description" content="${e(desc)}" />
+  <meta property="og:url" content="${e(CZ.shareUrl(wid, cid))}" />
+${image}
+  <meta property="og:locale" content="ja_JP" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta http-equiv="refresh" content="0; url=${e(root + target)}" />
+  <link rel="canonical" href="${e(absUrl(target))}" />
+</head>
+<body>
+  <p><a href="${e(root + target)}">${e(title)} のページへ移動します</a></p>
+</body>
+</html>
+`;
+  };
+
+  /* クリップボードにコピー（使えない環境では選択状態の入力欄で代用） */
+  CZ.copyText = async text => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (x) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (y) { /* 下で false を返す */ }
+      ta.remove();
+      return ok;
+    }
+  };
+
+  CZ.PERSON_ICON ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
 
   /* ログイン中は画面右下に管理メニューを出す */
   CZ.showAdminBar = editHref => {

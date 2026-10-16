@@ -98,6 +98,24 @@
     }).join('');
   }
 
+  /* Discord・X に貼ると名前と画像が埋め込み表示される URL（s/… の共有用ページ）をコピーするボタン */
+  const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 10a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>';
+  const shareHtml = url => `
+    <button type="button" class="share-btn" data-share="${esc(url)}" title="${esc(url)}">
+      ${LINK_ICON}<span class="share-btn-label">共有用URLをコピー</span>
+    </button>`;
+
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-share]');
+    if (!btn) return;
+    const labelEl = btn.querySelector('.share-btn-label');
+    const ok = await CZ.copyText(btn.dataset.share);
+    labelEl.textContent = ok ? 'コピーしました' : 'コピーできませんでした';
+    btn.classList.toggle('is-done', ok);
+    clearTimeout(btn.timer);
+    btn.timer = setTimeout(() => { labelEl.textContent = '共有用URLをコピー'; btn.classList.remove('is-done'); }, 2500);
+  });
+
   const tagsHtml = tags => (tags || []).length
     ? `<div class="hero-tags">${tags.map(t => `<span class="hero-tag">${esc(t)}</span>`).join('')}</div>`
     : '';
@@ -113,7 +131,8 @@
       <h1 class="hero-title">${esc(w.name)}</h1>
       ${w.reading ? `<div class="hero-reading">${esc(w.reading)}</div>` : ''}
       ${tagsHtml(w.tags)}
-      ${w.catch ? `<p class="hero-catch">${esc(w.catch)}</p>` : ''}`;
+      ${w.catch ? `<p class="hero-catch">${esc(w.catch)}</p>` : ''}
+      ${shareHtml(CZ.shareUrl(w.id))}`;
     contentEl.innerHTML = renderBlocks(w.blocks, data);
     CZ.showAdminBar(`admin.html#world/${encodeURIComponent(w.id)}`);
   }
@@ -134,6 +153,7 @@
         ${(c.reading_full || c.reading) ? `<div class="hero-reading">${esc(c.reading_full || c.reading)}</div>` : ''}
         ${tagsHtml(c.tags)}
         ${c.catch ? `<p class="hero-short-desc">${esc(c.catch)}</p>` : ''}
+        ${shareHtml(CZ.shareUrl(wid, c.id))}
       </div>`;
     contentEl.innerHTML = renderBlocks(c.blocks, data);
     const back = document.querySelector('.back-link');
