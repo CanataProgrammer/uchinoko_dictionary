@@ -381,7 +381,102 @@
         }
       ],
       "catch": "時代とともにこの世界も複雑に変わっていく。",
-      "characters": []
+      "characters": [
+        {
+          "id": "saku",
+          "name": "雨水 咲",
+          "reading": "うすい さく",
+          "tags": [
+            "新人類",
+            "重要人物",
+            "主人公",
+            "魔源"
+          ],
+          "short_description": "初恋を諦め、世界に抗い続けた魔導師",
+          "blocks": [
+            {
+              "type": "stats",
+              "title": "基本情報",
+              "rows": [
+                [
+                  "年齢",
+                  "18歳"
+                ],
+                [
+                  "身長",
+                  "165cm"
+                ],
+                [
+                  "体重",
+                  "55.3kg"
+                ],
+                [
+                  "誕生日",
+                  "3月9日"
+                ],
+                [
+                  "性別",
+                  "女性"
+                ],
+                [
+                  "種族",
+                  "新人類"
+                ],
+                [
+                  "出身",
+                  "実力主義の世界"
+                ],
+                [
+                  "職業",
+                  "道者"
+                ],
+                [
+                  "能力",
+                  "クリスタルの加護"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "性格・特徴",
+              "body": ""
+            },
+            {
+              "type": "text",
+              "title": "背景・設定",
+              "body": ""
+            },
+            {
+              "type": "text",
+              "title": "デザインメモ",
+              "body": ""
+            },
+            {
+              "type": "gallery",
+              "title": "イラスト",
+              "items": []
+            },
+            {
+              "type": "relations",
+              "title": "関係するキャラクター",
+              "items": [
+                {
+                  "target": "fabotus/canata",
+                  "name": "",
+                  "label": "片思いの相手、実力主義での相棒"
+                },
+                {
+                  "target": "fabotus/nagi_n",
+                  "name": "",
+                  "label": "運命に抗った味方、孤独の象徴"
+                }
+              ]
+            }
+          ],
+          "reading_full": "うすい さく/Usui Saku",
+          "catch": "抗え、全ての絶望に"
+        }
+      ]
     }
   ],
   "all_tags": [
