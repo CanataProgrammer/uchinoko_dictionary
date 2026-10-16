@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>管理画面 | 彼方の世界 設定資料集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Shippori+Mincho+B1:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body class="page-admin">
+
+<header class="site-header">
+  <a class="site-logo" href="index.html">
+    <span class="site-logo-mark">8626</span>
+    <span class="site-logo-sub">管理画面</span>
+  </a>
+  <nav class="site-nav" aria-label="メインメニュー">
+    <a href="index.html">サイトを見る</a>
+    <button type="button" class="admin-logout" id="logout" hidden>ログアウト</button>
+  </nav>
+</header>
+
+<!-- ─── ログイン ─── -->
+<section class="admin-gate" id="login-view" hidden>
+  <form class="gate-card" id="login-form" autocomplete="on">
+    <p class="gate-eyebrow">Admin</p>
+    <h1 class="gate-title">管理者ログイン</h1>
+    <label class="field">
+      <span class="field-label">ID</span>
+      <input type="text" id="login-id" name="username" autocomplete="username" required />
+    </label>
+    <label class="field">
+      <span class="field-label">パスワード</span>
+      <input type="password" id="login-pass" name="password" autocomplete="current-password" required />
+    </label>
+    <p class="form-error" id="login-error" role="alert"></p>
+    <button type="submit" class="btn-pill btn-block">ログイン <span class="arrow" aria-hidden="true">→</span></button>
+  </form>
+</section>
+
+<!-- ─── GitHub 接続（この端末で初めてログインしたときだけ） ─── -->
+<section class="admin-gate" id="token-view" hidden>
+  <form class="gate-card gate-wide" id="token-form">
+    <p class="gate-eyebrow">Setup</p>
+    <h1 class="gate-title">GitHub と接続する</h1>
+    <p class="gate-text">
+      編集内容は GitHub のリポジトリ（<code id="repo-name"></code>）に直接保存されます。
+      保存のために、この端末で一度だけ「アクセストークン」を登録してください。
+      トークンはパスワードで暗号化して、このブラウザにだけ保存されます。
+    </p>
+    <ol class="gate-steps">
+      <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub のトークン作成ページ</a>を開く</li>
+      <li>「Repository access」で <b>Only select repositories</b> → このサイトのリポジトリだけを選ぶ</li>
+      <li>「Permissions」の <b>Contents</b> を <b>Read and write</b> にする</li>
+      <li>作成されたトークン（<code>github_pat_…</code>）を下に貼り付ける</li>
+    </ol>
+    <label class="field">
+      <span class="field-label">アクセストークン</span>
+      <input type="password" id="token-input" autocomplete="off" spellcheck="false" required />
+    </label>
+    <p class="form-error" id="token-error" role="alert"></p>
+    <button type="submit" class="btn-pill btn-block">接続して保存 <span class="arrow" aria-hidden="true">→</span></button>
+  </form>
+</section>
+
+<!-- ─── 編集画面 ─── -->
+<div class="admin-app" id="app-view" hidden>
+  <aside class="admin-side" aria-label="世界とキャラクターの一覧">
+    <div class="side-head">
+      <p class="side-title">世界とキャラクター</p>
+      <button type="button" class="btn-small" data-go="new-world">＋ 世界を追加</button>
+    </div>
+    <nav id="tree"></nav>
+    <div class="side-foot">
+      <a href="#tags" class="side-link">タグ一覧を編集</a>
+      <button type="button" class="side-link" id="reset-token">GitHub トークンを再設定</button>
+    </div>
+  </aside>
+
+  <main class="admin-main" id="editor" tabindex="-1"></main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

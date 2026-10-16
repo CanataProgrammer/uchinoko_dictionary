@@ -341,6 +341,7 @@
     return TAG_COLORS[h % TAG_COLORS.length];
   };
 
+  window.colorTags = colorTags;
   function colorTags() {
     document.querySelectorAll('.hero-tag').forEach(tag => {
       tag.style.setProperty('--tag-color', window.tagColor(tag.textContent.trim()));

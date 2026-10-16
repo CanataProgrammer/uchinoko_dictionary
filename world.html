@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>世界 | 彼方の世界 設定資料集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Shippori+Mincho+B1:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/site.js"></script>
+</head>
+<!-- 世界ページ（world.html?id=世界ID）
+     中身は data/worlds.json から自動で表示されます（編集は admin.html から） -->
+<body class="page-world" data-page="world">
+
+<header class="site-header">
+  <a class="site-logo" href="index.html">
+    <span class="site-logo-mark">8626</span>
+    <span class="site-logo-sub">彼方の世界 設定資料集</span>
+  </a>
+  <nav class="site-nav" aria-label="メインメニュー">
+    <a href="index.html#worlds">Worlds</a>
+    <a href="index.html#characters">Characters</a>
+  </nav>
+</header>
+
+<a class="back-link" href="index.html">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+  一覧に戻る
+</a>
+
+<div class="detail-hero">
+  <div class="hero-scenery" data-scenery="band"></div>
+  <section class="hero" id="hero" aria-live="polite"></section>
+</div>
+
+<main class="content" id="content"></main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-label="画像の拡大表示">
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">8626</div>
+      <p class="footer-title">彼方の世界(8626番地) 設定資料集</p>
+    </div>
+    <nav class="footer-nav" aria-label="フッターメニュー">
+      <a href="index.html#worlds">Worlds</a>
+      <a href="index.html#characters">Characters</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </div>
+  <p class="footer-copy">Created by CanataZer0</p>
+</footer>
+
+<script src="assets/js/store.js"></script>
+<script src="assets/js/render.js"></script>
+</body>
+</html>
