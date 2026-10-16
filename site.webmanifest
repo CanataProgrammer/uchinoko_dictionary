@@ -1,0 +1,26 @@
+{
+  "name": "彼方の世界 設定資料集",
+  "short_name": "8626",
+  "description": "彼方の世界（8626番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#c8442e",
+  "icons": [
+    {
+      "src": "assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/brand/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
