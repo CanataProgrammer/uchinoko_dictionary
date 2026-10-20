@@ -492,3 +492,40 @@
   .admin-side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   .tree-move { display: flex; }
 }
+
+/* ─── 左の一覧：番地ごとの見出し ─── */
+.tree-addr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.6rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.6rem;
+  border-left: 3px solid #c8442e;
+  background: rgba(35, 38, 58, 0.04);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.tree-addr-1086 { border-left-color: #2678d4; }
+.tree-addr + .tree-world, .tree-addr + .tree-empty { margin-top: 0.2rem; }
+.tree-world + .tree-addr, .tree-empty + .tree-addr { margin-top: 1.4rem; }
+
+.tree-addr-name {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+
+.tree-addr-name small {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-left: 0.4rem;
+  letter-spacing: 0;
+}
+
+.tree-addr .btn-small.is-on { border-color: var(--ink); }
+.tree-empty { margin: 0 0 0.6rem 0.6rem; }

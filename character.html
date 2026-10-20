@@ -11,11 +11,11 @@
   <link rel="manifest" href="site.webmanifest" />
   <meta name="theme-color" content="#c8442e" />
   <!-- Discord・X などでリンクを貼ったときの埋め込み表示 -->
-  <meta name="description" content="彼方の世界（8626番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
+  <meta name="description" content="彼方の世界（8626番地・1086番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="彼方の世界 設定資料集" />
   <meta property="og:title" content="彼方の世界 設定資料集" />
-  <meta property="og:description" content="彼方の世界（8626番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
+  <meta property="og:description" content="彼方の世界（8626番地・1086番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
   <meta property="og:image" content="https://canataprogrammer.github.io/uchinoko_dictionary/assets/brand/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -33,13 +33,17 @@
 <body class="page-character" data-page="character">
 
 <header class="site-header">
-  <a class="site-logo" href="index.html">
-    <span class="site-logo-mark">8626</span>
+  <a class="site-logo" href="index.html" data-addr-link="">
+    <span class="site-logo-mark" data-addr-text="logo">8626</span>
     <span class="site-logo-sub">彼方の世界 設定資料集</span>
   </a>
   <nav class="site-nav" aria-label="メインメニュー">
-    <a href="index.html#worlds">Worlds</a>
-    <a href="index.html#characters">Characters</a>
+    <a class="nav-hide-sp" href="index.html#worlds" data-addr-link="#worlds" data-addr-text="navWorlds">Worlds</a>
+    <a class="nav-hide-sp" href="index.html#characters" data-addr-link="#characters">Characters</a>
+    <div class="addr-switch" role="group" aria-label="番地の切り替え">
+      <button type="button" data-addr="8626" aria-pressed="true">8626</button>
+      <button type="button" data-addr="1086" aria-pressed="false">1086</button>
+    </div>
   </nav>
 </header>
 
@@ -64,12 +68,12 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <div>
-      <div class="footer-logo">8626</div>
-      <p class="footer-title">彼方の世界(8626番地) 設定資料集</p>
+      <div class="footer-logo" data-addr-text="footerLogo">8626</div>
+      <p class="footer-title" data-addr-text="footerTitle">彼方の世界(8626番地) 設定資料集</p>
     </div>
     <nav class="footer-nav" aria-label="フッターメニュー">
-      <a href="index.html#worlds">Worlds</a>
-      <a href="index.html#characters">Characters</a>
+      <a href="index.html#worlds" data-addr-link="#worlds" data-addr-text="navWorlds">Worlds</a>
+      <a href="index.html#characters" data-addr-link="#characters">Characters</a>
       <a href="admin.html">Admin</a>
     </nav>
   </div>

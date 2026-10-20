@@ -17,6 +17,11 @@
     scenery.dataset.seed = String(h % 90000 + 1000);
   }
 
+  // 番地（配色・文言）：まず前回の番地で表示し、データを読んだら世界（都市）の番地に合わせる
+  let addr = CZ.applyAddress(CZ.currentAddress());
+  CZ.bindAddressSwitch();
+  const worldAddr = (data, id) => CZ.worldAddress(CZ.findWorld(data, id));
+
   const heroEl = document.getElementById('hero');
   const contentEl = document.getElementById('content');
 
@@ -56,7 +61,7 @@
           const target = it.target ? CZ.findChar(data, rw, rc) : null;
           const name = it.name || (target && target.name) || '';
           const thumb = it.thumbnail || (target && target.thumbnail) || '';
-          const href = target ? CZ.charUrl(rw, rc) : (it.href || '');
+          const href = target ? CZ.charUrl(rw, rc, worldAddr(data, rw)) : (it.href || '');
           const inner = `
             ${thumb
               ? `<img class="relation-thumb" src="${esc(thumb)}" alt="" />`
@@ -77,7 +82,7 @@
       return `
         <div class="char-list">
           ${chars.map(c => `
-            <a class="char-list-item" href="${CZ.charUrl(wid, c.id)}">
+            <a class="char-list-item" href="${CZ.charUrl(wid, c.id, addr)}">
               ${c.thumbnail
                 ? `<img class="char-list-thumb" src="${esc(c.thumbnail)}" alt="" loading="lazy" />`
                 : `<div class="char-list-thumb-placeholder">${CZ.PERSON_ICON}</div>`}
@@ -123,11 +128,12 @@
   /* ─── 世界ページ ─── */
   function renderWorld(data) {
     const w = CZ.findWorld(data, wid);
-    if (!w) return notFound('この世界は見つかりませんでした。');
+    if (!w) return notFound('この世界・都市は見つかりませんでした。');
+    setAddress(w);
     document.title = `${w.name} | 彼方の世界 設定資料集`;
     heroEl.innerHTML = `
       ${w.banner ? `<img class="hero-banner" src="${esc(w.banner)}" alt="" />` : ''}
-      <div class="hero-eyebrow">${esc(w.eyebrow || 'World Setting')}</div>
+      <div class="hero-eyebrow">${esc(w.eyebrow || CZ.address(addr).eyebrow)}</div>
       <h1 class="hero-title">${esc(w.name)}</h1>
       ${w.reading ? `<div class="hero-reading">${esc(w.reading)}</div>` : ''}
       ${tagsHtml(w.tags)}
@@ -142,6 +148,7 @@
     const w = CZ.findWorld(data, wid);
     const c = CZ.findChar(data, wid, cid);
     if (!c) return notFound('このキャラクターは見つかりませんでした。');
+    setAddress(w);
     const name = c.display_name || c.name;
     document.title = `${name} | 彼方の世界 設定資料集`;
     const img = c.image || c.thumbnail;
@@ -156,9 +163,17 @@
         ${shareHtml(CZ.shareUrl(wid, c.id))}
       </div>`;
     contentEl.innerHTML = renderBlocks(c.blocks, data);
-    const back = document.querySelector('.back-link');
-    if (back) back.href = `index.html?world=${encodeURIComponent(wid)}#characters`;
     CZ.showAdminBar(`admin.html#char/${encodeURIComponent(wid)}/${encodeURIComponent(c.id)}`);
+  }
+
+  /* 世界（都市）の番地に合わせて配色・文言を切り替え、一覧へ戻るリンクを作る */
+  function setAddress(w) {
+    addr = CZ.applyAddress(CZ.worldAddress(w));
+    const q = new URLSearchParams();
+    if (addr !== CZ.DEFAULT_ADDRESS) q.set('addr', addr);
+    q.set('world', w.id);
+    const back = document.querySelector('.back-link');
+    if (back) back.href = `index.html?${q}${page === 'world' ? '#worlds' : '#characters'}`;
   }
 
   function notFound(msg) {

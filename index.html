@@ -11,11 +11,11 @@
   <link rel="manifest" href="site.webmanifest" />
   <meta name="theme-color" content="#c8442e" />
   <!-- Discord・X などでリンクを貼ったときの埋め込み表示 -->
-  <meta name="description" content="彼方の世界（8626番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
+  <meta name="description" content="彼方の世界（8626番地・1086番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="彼方の世界 設定資料集" />
   <meta property="og:title" content="彼方の世界 設定資料集" />
-  <meta property="og:description" content="彼方の世界（8626番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
+  <meta property="og:description" content="彼方の世界（8626番地・1086番地）に生きるうちの子たちと、その世界観をまとめた設定資料集。" />
   <meta property="og:url" content="https://canataprogrammer.github.io/uchinoko_dictionary/" />
   <meta property="og:image" content="https://canataprogrammer.github.io/uchinoko_dictionary/assets/brand/og-image.png" />
   <meta property="og:image:width" content="1200" />
@@ -33,12 +33,16 @@
 
 <header class="site-header">
   <a class="site-logo" href="index.html">
-    <span class="site-logo-mark">8626</span>
+    <span class="site-logo-mark" data-addr-text="logo">8626</span>
     <span class="site-logo-sub">彼方の世界 設定資料集</span>
   </a>
   <nav class="site-nav" aria-label="メインメニュー">
-    <a href="#worlds">Worlds <span class="plus">+</span></a>
-    <a href="#characters">Characters <span class="plus">+</span></a>
+    <a class="nav-hide-sp" href="#worlds" data-addr-text="navWorlds">Worlds</a>
+    <a class="nav-hide-sp" href="#characters">Characters</a>
+    <div class="addr-switch" role="group" aria-label="番地の切り替え">
+      <button type="button" data-addr="8626" aria-pressed="true">8626</button>
+      <button type="button" data-addr="1086" aria-pressed="false">1086</button>
+    </div>
   </nav>
 </header>
 
@@ -46,16 +50,23 @@
      KEY VISUAL
      ═══════════════════════════════════════════ -->
 <section class="kv">
-  <!-- 背景：城・神社と鳥居・大都市のシルエット（assets/js/site.js で描画） -->
+  <!-- 背景のシルエット（assets/js/site.js で描画）
+       8626番地：城・神社と鳥居・大都市 ／ 1086番地：夜の大都市と塔 -->
   <div class="kv-scenery" data-scenery="kv" data-seed="8626"></div>
   <div class="kv-inner">
     <h1 class="kv-title">
       <span class="line">彼方の世界<span class="accent">、</span></span>
       <span class="line">設定資料集<span class="accent">。</span></span>
     </h1>
-    <p class="kv-sub">8626番地 ― Uchinoko Archive</p>
+    <p class="kv-sub" data-addr-text="kvSub">8626番地 ― Uchinoko Archive</p>
+    <div class="kv-switch-wrap">
+      <div class="addr-switch addr-switch-lg" role="group" aria-label="番地の切り替え">
+        <button type="button" data-addr="8626" aria-pressed="true">8626番地<small>Worlds</small></button>
+        <button type="button" data-addr="1086" aria-pressed="false">1086番地<small>Cities</small></button>
+      </div>
+    </div>
   </div>
-  <p class="kv-vertical">彼方ノ世界　八六二六番地</p>
+  <p class="kv-vertical" data-addr-text="kvVertical">彼方ノ世界　八六二六番地</p>
 </section>
 
 <!-- 世界名・キャラクター名が流れる帯（worlds.json から自動で埋まる） -->
@@ -69,10 +80,10 @@
 <section class="block" id="worlds">
   <div class="block-head">
     <div class="section-headline">
-      <h2 class="section-headline-label">Worlds</h2>
+      <h2 class="section-headline-label" data-addr-text="worldsLabel">Worlds</h2>
     </div>
-    <p class="section-lead">世界を、えらぶ。</p>
-    <p class="section-text">世界を選択すると、その世界に生きるキャラクターたちが表示されます。</p>
+    <p class="section-lead" data-addr-text="worldsLead">世界を、えらぶ。</p>
+    <p class="section-text" data-addr-text="worldsText">世界を選択すると、その世界に生きるキャラクターたちが表示されます。</p>
   </div>
 
   <div class="world-list" id="world-list" role="group" aria-label="世界選択"></div>
@@ -90,7 +101,7 @@
     <div class="section-headline">
       <h2 class="section-headline-label">Characters</h2>
     </div>
-    <p class="section-lead">その世界に、生きるひとびと。</p>
+    <p class="section-lead" data-addr-text="charsLead">その世界に、生きるひとびと。</p>
   </div>
 
   <div class="char-toolbar">
@@ -118,11 +129,11 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <div>
-      <div class="footer-logo">8626</div>
-      <p class="footer-title">彼方の世界(8626番地) 設定資料集</p>
+      <div class="footer-logo" data-addr-text="footerLogo">8626</div>
+      <p class="footer-title" data-addr-text="footerTitle">彼方の世界(8626番地) 設定資料集</p>
     </div>
     <nav class="footer-nav" aria-label="フッターメニュー">
-      <a href="#worlds">Worlds</a>
+      <a href="#worlds" data-addr-text="navWorlds">Worlds</a>
       <a href="#characters">Characters</a>
       <a href="admin.html">Admin</a>
     </nav>
@@ -142,17 +153,20 @@
   const gridWrap    = document.getElementById('char-grid-wrap');
   const resultMeta  = document.getElementById('result-meta');
 
-  const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+  const { esc, pad, PERSON_ICON } = CZ;
 
   let allData = null;
   let activeTags = new Set();
   let currentWorld = null;
+  // いま表示している番地（8626 / 1086）。文言はデータを待たずに先に入れ替える
+  let addr = CZ.applyAddress(CZ.currentAddress());
+  const unit = () => CZ.address(addr).unit;
+
+  CZ.bindAddressSwitch(next => switchAddress(next));
 
   CZ.loadData()
     .then(data => {
       allData = data;
-      buildMarquee(data.worlds);
-      buildWorldList(data.worlds);
       buildTagPanel(data.all_tags || []);
       readUrlState();
       CZ.showAdminBar('');
@@ -161,7 +175,20 @@
       gridWrap.innerHTML = '<div class="empty-state"><p>データの読み込みに失敗しました。worlds.json を確認してください。</p></div>';
     });
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  /* 番地を切り替えて、世界（都市）とキャラクターの一覧を作り直す */
+  function switchAddress(next, keepWorld) {
+    addr = CZ.applyAddress(next);
+    if (!allData) return;
+    const worlds = CZ.worldsIn(allData, addr);
+    if (!keepWorld) currentWorld = worlds.length === 1 ? worlds[0] : null;
+    worldList.setAttribute('aria-label', `${unit()}選択`);
+    buildMarquee(worlds);
+    buildWorldList(worlds);
+    syncWorldCards();
+    renderWorldInfo();
+    renderGrid();
+    updateUrl();
+  }
 
   // 世界名とキャラクター名を流れる帯に並べる（2周分つなげて途切れないようにする）
   function buildMarquee(worlds) {
@@ -170,13 +197,18 @@
       names.push(w.name);
       (w.characters || []).forEach(c => names.push(c.name));
     });
-    names.push('Uchinoko Archive');
+    names.push(`${addr}番地`, 'Uchinoko Archive');
     const group = names.map(n => `<span class="marquee-item">${esc(n)}</span><span class="marquee-sep"></span>`).join('');
     const track = document.getElementById('marquee-track');
     track.innerHTML = `<div class="marquee-group">${group}${group}</div><div class="marquee-group">${group}${group}</div>`;
   }
 
   function buildWorldList(worlds) {
+    worldList.innerHTML = '';
+    if (!worlds.length) {
+      worldList.innerHTML = `<div class="empty-state"><p>${addr}番地には、まだ${unit()}が登録されていません。</p></div>`;
+      return;
+    }
     worlds.forEach((w, i) => {
       const card = document.createElement('button');
       card.type = 'button';
@@ -199,7 +231,7 @@
   }
 
   function selectWorld(wid) {
-    currentWorld = wid ? allData.worlds.find(w => w.id === wid) || null : null;
+    currentWorld = wid ? CZ.findWorld(allData, wid) : null;
     syncWorldCards();
     renderWorldInfo();
     renderGrid();
@@ -260,14 +292,14 @@
         <div class="world-name">${esc(currentWorld.name)}</div>
         <div class="world-desc">${esc(currentWorld.description || '')}</div>
       </div>
-      <a class="btn-pill" href="${CZ.worldUrl(currentWorld.id)}">詳細設定を見る <span class="arrow" aria-hidden="true">→</span></a>`;
+      <a class="btn-pill" href="${CZ.worldUrl(currentWorld.id, addr)}">詳細設定を見る <span class="arrow" aria-hidden="true">→</span></a>`;
     animateIn(worldInfoInner);
   }
 
   function renderGrid() {
     if (!currentWorld) {
       resultMeta.innerHTML = '';
-      gridWrap.innerHTML = `<div class="empty-state">${PERSON_ICON}<p>世界を選択するとキャラクターが表示されます</p></div>`;
+      gridWrap.innerHTML = `<div class="empty-state">${PERSON_ICON}<p>${unit()}を選択するとキャラクターが表示されます</p></div>`;
       return;
     }
 
@@ -290,7 +322,7 @@
     chars.forEach((c, i) => {
       const card = document.createElement('a');
       card.className = 'char-card';
-      card.href = CZ.charUrl(currentWorld.id, c.id);
+      card.href = CZ.charUrl(currentWorld.id, c.id, addr);
       card.style.animationDelay = `${i * 0.06}s`;
       card.setAttribute('aria-label', c.name);
 
@@ -322,6 +354,7 @@
 
   function updateUrl() {
     const params = new URLSearchParams();
+    if (addr !== CZ.DEFAULT_ADDRESS) params.set('addr', addr);
     if (currentWorld) params.set('world', currentWorld.id);
     if (activeTags.size > 0) params.set('tags', [...activeTags].join(','));
     const url = params.toString() ? `?${params}` : location.pathname;
@@ -332,9 +365,6 @@
     const params = new URLSearchParams(location.search);
     const wid = params.get('world');
     const tags = params.get('tags');
-    // 世界が1つだけなら最初から選択しておく
-    const initial = wid || (allData.worlds.length === 1 ? allData.worlds[0].id : null);
-    if (initial) currentWorld = allData.worlds.find(w => w.id === initial) || null;
     if (tags) {
       tags.split(',').forEach(t => {
         activeTags.add(t);
@@ -343,13 +373,14 @@
       });
       tagClear.style.display = activeTags.size > 0 ? 'inline' : 'none';
     }
-    syncWorldCards();
-    renderWorldInfo();
-    renderGrid();
-  }
-
-  function esc(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    // URL で世界（都市）が指定されていれば、その番地を表示する
+    const linked = wid ? CZ.findWorld(allData, wid) : null;
+    if (linked) {
+      currentWorld = linked;
+      switchAddress(CZ.worldAddress(linked), true);
+    } else {
+      switchAddress(addr);
+    }
   }
 </script>
 </body>

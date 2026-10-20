@@ -1,6 +1,9 @@
 /* ═══════════════════════════════════════════
    8626 設定資料集 共通スクリプト
-   ・[data-scenery] に「城・神社と鳥居・大都市」のシルエットを描く
+   ・番地（8626 / 1086）を <html data-address> に設定し、配色を切り替える
+   ・[data-scenery] にシルエットを描く
+       8626番地 … 城・神社と鳥居・大都市
+       1086番地 … 夜の大都市と、中央にそびえる塔
        kv     … トップページの大きな背景（月・光輪・魔素の粒つき）
        band   … 詳細ページのヒーロー下に敷く細い帯
        footer … フッター上端の夜景（自動で追加）
@@ -12,6 +15,17 @@
   const NS = 'http://www.w3.org/2000/svg';
   const TAG_COLORS = ['var(--tag-shu)', 'var(--tag-ai)', 'var(--tag-kin)', 'var(--tag-take)'];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ─── 番地 ───
+     URL の ?addr=、なければ前回見ていた番地。描画前に決めて、配色のちらつきを防ぐ */
+  const ADDRESS_IDS = ['8626', '1086'];
+  const THEME_COLORS = { 8626: '#c8442e', 1086: '#2678d4' };
+  const root = document.documentElement;
+  (function initAddress() {
+    let a = new URLSearchParams(location.search).get('addr');
+    if (!a) { try { a = localStorage.getItem('cz-address'); } catch (e) { /* 読めなければ既定の番地 */ } }
+    root.dataset.address = ADDRESS_IDS.includes(a) ? a : ADDRESS_IDS[0];
+  })();
 
   // 毎回同じ形になるよう、シード付きの乱数を使う
   function seeded(seed) {
@@ -187,8 +201,60 @@
     }
   }
 
+  /* 1086番地：夜の大都市（中央の塔が朱の鳥居の代わりの目印） */
+  function drawMegaCity(g, rand, withWindows, win, W, ground, minH, maxH) {
+    let x = -30;
+    while (x < W + 30) {
+      const w = 30 + rand() * 54;
+      // 中央ほど高く
+      const center = 1 - Math.abs((x + w / 2) - W / 2) / (W / 2);
+      const h = minH + rand() * (maxH - minH) * (0.45 + center * 0.55);
+      const top = ground - h;
+      el('rect', { x: f(x), y: f(top), width: f(w), height: f(520 - top) }, g);
+      const crown = rand();
+      if (crown < 0.2) el('rect', { x: f(x + w / 2 - 1), y: f(top - 30), width: 2, height: 30 }, g);
+      else if (crown < 0.4) el('rect', { x: f(x + w * 0.2), y: f(top - 14), width: f(w * 0.6), height: 14 }, g);
+      else if (crown < 0.5) el('path', { d: `M${f(x)} ${f(top)} L${f(x + w / 2)} ${f(top - 22)} L${f(x + w)} ${f(top)} Z` }, g);
+      if (withWindows) {
+        for (let wx = x + 5; wx < x + w - 7; wx += 9) {
+          for (let wy = top + 9; wy < 512; wy += 12) {
+            const r = rand();
+            if (r < 0.22) {
+              const tw = r < 0.04;
+              el('rect', {
+                x: f(wx), y: f(wy), width: 3.5, height: 5,
+                class: tw ? 'win tw' : 'win',
+                ...(tw ? { style: `--d:${(rand() * 6).toFixed(1)}s;--t:${(2 + rand() * 4).toFixed(1)}s` } : {})
+              }, win);
+            }
+          }
+        }
+      }
+      x += w + 2 + rand() * 6;
+    }
+  }
+
+  function drawTower(near, accent, cx, withWindows, win) {
+    // 足もとの低い街並み
+    el('path', { d: `M${cx - 260} 520 L${cx - 230} 470 L${cx - 120} 452 L${cx - 60} 446 L${cx + 60} 446 L${cx + 120} 452 L${cx + 230} 470 L${cx + 260} 520 Z` }, near);
+    // 塔（朱の鳥居に代わる、番地の目印）
+    const t = el('g', { class: 'torii' }, accent);
+    el('path', { d: `M${cx - 30} 520 L${cx - 11} 210 L${cx + 11} 210 L${cx + 30} 520 Z` }, t);
+    el('rect', { x: cx - 40, y: 236, width: 80, height: 16, rx: 7 }, t);
+    el('rect', { x: cx - 30, y: 300, width: 60, height: 12, rx: 6 }, t);
+    el('path', { d: `M${cx - 7} 212 L${cx} 92 L${cx + 7} 212 Z` }, t);
+    el('rect', { x: cx - 1, y: 70, width: 2, height: 24 }, t);
+    el('ellipse', { cx, cy: 244, rx: 70, ry: 12, class: 'ring' }, t);
+    el('ellipse', { cx, cy: 306, rx: 52, ry: 9, class: 'ring' }, t);
+    if (withWindows) {
+      el('circle', { cx, cy: 70, r: 3, class: 'beacon' }, win);
+      for (let y = 330; y < 500; y += 18) el('rect', { x: cx - 2, y, width: 4, height: 8, class: 'win tw', style: `--d:${(y % 7) * 0.4}s;--t:3s` }, win);
+    }
+  }
+
   function buildScene(host) {
     const mode = host.dataset.scenery || 'kv';
+    const city = root.dataset.address === '1086';
     const W = 1600, H = 520;
     const rand = seeded(Number(host.dataset.seed) || 8626);
     const lit = mode !== 'band';
@@ -209,18 +275,24 @@
     }
 
     const far = layer('far', 0.3);
-    drawFar(far, rand, W);
-
     // 窓明かりは建物の上に重なる別レイヤーへ、建物と同時に描く
     const mid = layer('mid', 0.16);
     const lights = layer('lights', 0.16);
-    drawCastle(mid, 400, lit, lights);
-    drawCity(mid, 1010, W + 20, rand, lit, lights, 440);
-
     const near = layer('near', 0.06);
     const accent = layer('accent', 0.06);
-    drawShrine(near, accent, 800, rand);
-    drawBushes(near, rand, W);
+
+    if (city) {
+      drawMegaCity(far, rand, false, null, W, 470, 120, 300);
+      drawMegaCity(mid, rand, lit, lights, W, 500, 60, 230);
+      drawTower(near, accent, 800, lit, lights);
+      drawBushes(near, rand, W);
+    } else {
+      drawFar(far, rand, W);
+      drawCastle(mid, 400, lit, lights);
+      drawCity(mid, 1010, W + 20, rand, lit, lights, 440);
+      drawShrine(near, accent, 800, rand);
+      drawBushes(near, rand, W);
+    }
 
     if (mode === 'kv') {
       // ふわふわ漂う魔素の粒
@@ -234,15 +306,28 @@
       }
     }
 
+    host.querySelectorAll('svg.scene').forEach(old => old.remove());
     host.appendChild(svg);
     return svg;
   }
 
+  /* 番地の配色に切り替え、背景の絵を描き直す（store.js の CZ.applyAddress から呼ぶ） */
+  window.applyAddressTheme = addr => {
+    if (!ADDRESS_IDS.includes(addr)) addr = ADDRESS_IDS[0];
+    try { localStorage.setItem('cz-address', addr); } catch (e) { /* 保存できなくても表示は切り替える */ }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = THEME_COLORS[addr];
+    if (root.dataset.address === addr) return;
+    root.dataset.address = addr;
+    if (document.readyState !== 'loading') document.querySelectorAll('[data-scenery]').forEach(buildScene);
+  };
+
   function setupParallax() {
-    const groups = [...document.querySelectorAll('.kv .parallax, .detail-hero .parallax')];
-    if (!groups.length || reduceMotion) return;
+    if (reduceMotion) return;
     let ticking = false;
     const update = () => {
+      // 描き直しても追従するよう、毎回探す
+      const groups = document.querySelectorAll('.kv .parallax, .detail-hero .parallax');
       const y = window.scrollY;
       if (y < window.innerHeight * 1.2) {
         groups.forEach(g => { g.style.transform = `translateY(${(y * Number(g.dataset.depth)).toFixed(1)}px)`; });
@@ -359,6 +444,8 @@
       footer.prepend(s);
     }
 
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = THEME_COLORS[root.dataset.address];
     document.querySelectorAll('[data-scenery]').forEach(buildScene);
     setupParallax();
     colorTags();

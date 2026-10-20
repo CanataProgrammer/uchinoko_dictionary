@@ -47,7 +47,8 @@ shot "$BRAND/favicon-48.png"        512 512 0.09375   00000000 "$ICON"
 shot "$BRAND/apple-touch-icon.png"  512 512 0.3515625 1c1f31ff "$ICON"
 shot "$BRAND/icon-192.png"          512 512 0.375     00000000 "$ICON"
 shot "$BRAND/icon-512.png"          512 512 1         00000000 "$ICON"
-shot "$BRAND/og-image.png"          1200 630 1        f6f4efff "$BRAND/og.html?t=$(date +%s)"
+shot "$BRAND/og-image.png"          1200 630 1        f6f4efff "$BRAND/og.html?addr=8626&t=$(date +%s)"
+shot "$BRAND/og-image-1086.png"     1200 630 1        f1f5faff "$BRAND/og.html?addr=1086&t=$(date +%s)"
 
 # favicon.ico（16 / 32 / 48px の PNG をまとめる）
 python - "$BRAND" <<'PY'

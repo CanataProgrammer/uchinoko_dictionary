@@ -67,5 +67,12 @@
     <p class="og-eyebrow">8626番地 ― Uchinoko Archive</p>
     <h1 class="og-title"><span>彼方の世界<b>、</b></span><span>設定資料集<b>。</b></span></h1>
   </div>
+  <script>
+    // og.html?addr=1086 で 1086番地版（青い配色・夜の大都市）になる → og-image-1086.png
+    if (document.documentElement.dataset.address === '1086') {
+      document.querySelector('.og-eyebrow').textContent = '1086番地 ― Uchinoko Archive';
+      document.body.style.background = 'linear-gradient(180deg, #dbe5f4 0%, #e5edf7 48%, #ebf2f9 78%, #f1f5fa 100%)';
+    }
+  </script>
 </body>
 </html>

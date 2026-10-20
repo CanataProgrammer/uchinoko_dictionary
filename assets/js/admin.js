@@ -336,7 +336,8 @@
   }
 
   /* ═══════════ 画面の切り替え（URL の # で管理） ═══════════
-     #world/世界ID  #char/世界ID/キャラID  #new-world  #new-char/世界ID  #tags */
+     #world/世界ID  #char/世界ID/キャラID  #new-world/番地  #new-char/世界ID  #tags
+     （「世界」は 1086番地では「都市」と呼ぶ。中身は同じ） */
   window.addEventListener('hashchange', () => {
     if (!state.data) return;
     if (state.dirty && !confirm('保存していない変更があります。破棄して移動しますか？')) {
@@ -365,8 +366,9 @@
     state.dirty = false;
     const [kind, a, b] = location.hash.slice(1).split('/').map(decodeURIComponent);
     state.edit = null;
+    setTheme(CZ.DEFAULT_ADDRESS);
     if (kind === 'world' && a) editWorld(a);
-    else if (kind === 'new-world') editWorld(null);
+    else if (kind === 'new-world') editWorld(null, a);
     else if (kind === 'char' && a && b) editChar(a, b);
     else if (kind === 'new-char' && a) editChar(a, null);
     else if (kind === 'tags') editTags();
@@ -375,6 +377,10 @@
     editor.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
+
+  // 編集中の世界（都市）の番地の配色にする（1086番地なら青）
+  function setTheme(addr) { document.documentElement.dataset.address = CZ.address(addr).id; }
+  const unitOf = w => CZ.address(CZ.worldAddress(w)).unit;
 
   /* ═══════════ DOM ヘルパー ═══════════ */
   function h(tag, attrs, ...kids) {
@@ -557,7 +563,7 @@
     cards: { label: 'カード（勢力・組織など）', title: '主な勢力・組織', make: () => ({ items: [{ name: '', desc: '' }] }) },
     gallery: { label: '画像ギャラリー', title: 'イラスト', make: () => ({ items: [] }) },
     relations: { label: '関係キャラクター', title: '関係するキャラクター', make: () => ({ items: [] }) },
-    characters: { label: 'この世界のキャラ一覧（自動）', title: '登場キャラクター', make: () => ({}), worldOnly: true }
+    characters: { label: 'この世界・都市のキャラ一覧（自動）', title: '登場キャラクター', make: () => ({}), worldOnly: true }
   };
 
   function allCharOptions() {
@@ -621,7 +627,7 @@
         listEditor(b.items, it => relationItem(it, folderFn),
           () => ({ target: '', name: '', label: '' }), 'キャラクターを追加', { emptyText: 'まだ登録がありません。' })));
     } else if (b.type === 'characters') {
-      parts.push(h('p', { class: 'field-help' }, 'この世界に登録されているキャラクターの一覧を自動で表示します。'));
+      parts.push(h('p', { class: 'field-help' }, 'この世界・都市に登録されているキャラクターの一覧を自動で表示します。'));
     }
     return h('div', { class: 'block-edit' }, parts);
   }
@@ -743,10 +749,18 @@
     const draft = clone(src);
     const e = state.edit = { wid, cid, draft, worldSel: wid };
     const folder = () => e.worldSel;
+    const unit = unitOf(world);
+    setTheme(CZ.worldAddress(world));
 
+    // 番地ごとにまとめた「所属する世界・都市」の選択肢
     const worldSelect = h('select', {},
-      state.data.worlds.map(w => h('option', { value: w.id, selected: w.id === wid }, w.name)));
-    worldSelect.addEventListener('change', () => { e.worldSel = worldSelect.value; touch(); });
+      CZ.ADDRESSES.map(a => h('optgroup', { label: `${a.id}番地（${a.unit}）` },
+        CZ.worldsIn(state.data, a.id).map(w => h('option', { value: w.id, selected: w.id === wid }, w.name)))));
+    worldSelect.addEventListener('change', () => {
+      e.worldSel = worldSelect.value;
+      setTheme(CZ.worldAddress(CZ.findWorld(state.data, e.worldSel)));
+      touch();
+    });
 
     let titleEl;
     const save = async () => {
@@ -758,7 +772,7 @@
       const target = CZ.findWorld(next, e.worldSel);
       target.characters = target.characters || [];
       if (target.characters.some(c => c.id === d.id && !(e.wid === e.worldSel && c.id === e.cid))) {
-        return toast('この ID は同じ世界の別のキャラクターが使っています。', 'error');
+        return toast(`この ID は同じ${unitOf(target)}の別のキャラクターが使っています。`, 'error');
       }
       if (e.cid) {
         const from = CZ.findWorld(next, e.wid);
@@ -787,13 +801,13 @@
     titleEl = panel({
       crumbs: [h('a', { href: `#world/${encodeURIComponent(wid)}` }, world.name), ' ／ ', cid ? 'キャラクターを編集' : 'キャラクターを追加'],
       title: draft.name,
-      viewHref: cid ? CZ.charUrl(wid, cid) : null,
+      viewHref: cid ? CZ.charUrl(wid, cid, CZ.worldAddress(world)) : null,
       shareUrl: cid ? CZ.shareUrl(wid, cid) : null,
       onDelete: cid ? remove : null,
       onSave: save,
       sections: [
         ['一覧に表示される情報', 'トップページのキャラクター一覧に表示されます。',
-          h('label', { class: 'field' }, label('所属する世界'), worldSelect),
+          h('label', { class: 'field' }, label('所属する世界・都市'), worldSelect),
           textField('ID', draft, 'id', { required: true, code: true, help: 'ページの URL に使われます（半角小文字の英数字・-・_）。後から変えると URL も変わります。' }),
           textField('名前', draft, 'name', { required: true, placeholder: '例：□□ 彼方', onInput: v => { titleEl.textContent = v || '（名前未設定）'; } }),
           textField('読み', draft, 'reading', { placeholder: '例：はてな かなた' }),
@@ -803,7 +817,7 @@
         ['キャラクターページの上部', '空欄の項目は、上の「一覧に表示される情報」が使われます。',
           textField('ページの見出し名', draft, 'display_name', { placeholder: '空欄なら「名前」と同じ' }),
           textField('ページの読み・英語表記', draft, 'reading_full', { placeholder: '例：はてな 彼方/Hatena Canata' }),
-          textField('所属の表記', draft, 'affiliation', { placeholder: '空欄なら世界名' }),
+          textField('所属の表記', draft, 'affiliation', { placeholder: `空欄なら${unit}名` }),
           textField('キャッチコピー', draft, 'catch', { placeholder: '例：冒険者・救世主・相棒・職員' }),
           imageField('立ち絵', draft, 'image', folder, { help: '空欄ならサムネイル画像を使います。' })],
         ['本文', 'キャラクターページに上から順に表示されます。↑↓ で並べ替えできます。',
@@ -812,19 +826,21 @@
     });
   }
 
-  /* ═══════════ 世界編集 ═══════════ */
-  function newWorld() {
+  /* ═══════════ 世界（都市）編集 ═══════════ */
+  function newWorld(addr) {
+    const a = CZ.address(addr);
     return {
-      id: uniqueId('world', state.data.worlds.map(w => w.id)),
+      id: uniqueId(a.id === CZ.DEFAULT_ADDRESS ? 'world' : 'city', state.data.worlds.map(w => w.id)),
+      address: a.id,
       name: '',
       reading: '',
-      eyebrow: 'World Setting',
+      eyebrow: a.eyebrow,
       description: '',
       tags: [],
       characters: [],
       blocks: [
-        { type: 'stats', title: '基本設定', rows: ['舞台・時代', '技術水準', '主な種族', '世界の規模'].map(k => [k, '']) },
-        { type: 'text', title: '世界観・概要', body: '' },
+        { type: 'stats', title: '基本設定', rows: ['舞台・時代', '技術水準', '主な種族', `${a.unit}の規模`].map(k => [k, '']) },
+        { type: 'text', title: a.unit === '世界' ? '世界観・概要' : '都市の概要', body: '' },
         { type: 'cards', title: '主な勢力・組織', items: [] },
         { type: 'text', title: '補足設定', body: '' },
         { type: 'characters', title: '登場キャラクター' },
@@ -833,14 +849,23 @@
     };
   }
 
-  function editWorld(wid) {
-    const src = wid ? CZ.findWorld(state.data, wid) : newWorld();
+  function editWorld(wid, newAddr) {
+    const src = wid ? CZ.findWorld(state.data, wid) : newWorld(newAddr);
     if (!src) return missing();
     const draft = clone(src);
     delete draft.characters; // キャラクターは別画面で編集する
+    draft.address = CZ.worldAddress(src);
     const e = state.edit = { wid, draft };
     const folder = () => draft.id || 'common';
     const count = (src.characters || []).length;
+    const A = CZ.address(draft.address);
+    const unit = A.unit;
+    setTheme(A.id);
+
+    // 番地（8626番地 / 1086番地）。変えるとその番地の一覧に移る
+    const addrSelect = h('select', {},
+      CZ.ADDRESSES.map(a => h('option', { value: a.id, selected: a.id === draft.address }, `${a.id}番地（${a.unit}）`)));
+    addrSelect.addEventListener('change', () => { draft.address = addrSelect.value; setTheme(draft.address); touch(); });
 
     let titleEl;
     const save = async () => {
@@ -849,7 +874,7 @@
       const problem = checkId(d.id) || (!d.name ? '名前を入力してください。' : '');
       if (problem) return toast(problem, 'error');
       const next = clone(state.data);
-      if (next.worlds.some(w => w.id === d.id && w.id !== wid)) return toast('この ID は別の世界が使っています。', 'error');
+      if (next.worlds.some(w => w.id === d.id && w.id !== wid)) return toast('この ID は別の世界・都市が使っています。', 'error');
       if (wid) {
         const idx = next.worlds.findIndex(w => w.id === wid);
         d.characters = next.worlds[idx].characters || [];
@@ -859,41 +884,42 @@
         d.characters = [];
         next.worlds.push(d);
       }
-      const ok = await commit(next, `管理画面: 世界「${d.name}」を${wid ? '更新' : '追加'}`);
+      const ok = await commit(next, `管理画面: ${CZ.address(d.address).unit}「${d.name}」を${wid ? '更新' : '追加'}`);
       if (ok) goTo(`world/${d.id}`);
     };
 
     const remove = async () => {
       const msg = count
-        ? `世界「${src.name}」と、所属する ${count} 人のキャラクターをすべて削除しますか？\nこの操作は元に戻せません。`
-        : `世界「${src.name}」を削除しますか？\nこの操作は元に戻せません。`;
+        ? `${unit}「${src.name}」と、所属する ${count} 人のキャラクターをすべて削除しますか？\nこの操作は元に戻せません。`
+        : `${unit}「${src.name}」を削除しますか？\nこの操作は元に戻せません。`;
       if (!confirm(msg)) return;
       const next = clone(state.data);
       next.worlds = next.worlds.filter(w => w.id !== wid);
-      const ok = await commit(next, `管理画面: 世界「${src.name}」を削除`);
+      const ok = await commit(next, `管理画面: ${unit}「${src.name}」を削除`);
       if (ok) goTo('');
     };
 
     titleEl = panel({
-      crumbs: [wid ? '世界を編集' : '世界を追加'],
+      crumbs: [`${A.id}番地 ／ ${unit}を${wid ? '編集' : '追加'}`],
       title: draft.name,
-      viewHref: wid ? CZ.worldUrl(wid) : null,
+      viewHref: wid ? CZ.worldUrl(wid, draft.address) : null,
       shareUrl: wid ? CZ.shareUrl(wid) : null,
       onDelete: wid ? remove : null,
       onSave: save,
       sections: [
-        ['一覧に表示される情報', 'トップページの世界カードに表示されます。',
+        ['一覧に表示される情報', `トップページの${unit}カードに表示されます。`,
+          h('label', { class: 'field' }, label('番地'), addrSelect),
           textField('ID', draft, 'id', { required: true, code: true, help: 'ページの URL と画像の保存先フォルダ名に使われます（半角小文字の英数字・-・_）。' }),
           textField('名前', draft, 'name', { required: true, placeholder: '例：ファボトス', onInput: v => { titleEl.textContent = v || '（名前未設定）'; } }),
-          textField('説明', draft, 'description', { wide: true, multiline: true, rows: 2, placeholder: '世界カードに表示される説明文' }),
+          textField('説明', draft, 'description', { wide: true, multiline: true, rows: 2, placeholder: `${unit}カードに表示される説明文` }),
           imageField('サムネイル画像（任意）', draft, 'thumbnail', folder)],
-        ['世界ページの上部', '',
+        [`${unit}ページの上部`, '',
           textField('読み・英語表記', draft, 'reading', { placeholder: '例：Fabotus' }),
-          textField('見出しの上の小さな英字', draft, 'eyebrow', { placeholder: 'World Setting' }),
+          textField('見出しの上の小さな英字', draft, 'eyebrow', { placeholder: A.eyebrow }),
           textField('キャッチコピー', draft, 'catch', { wide: true, placeholder: '例：ねじれにねじれた先の世界。' }),
           tagsField(draft),
           imageField('バナー画像（任意・横長）', draft, 'banner', folder)],
-        ['本文', '世界ページに上から順に表示されます。↑↓ で並べ替えできます。',
+        ['本文', `${unit}ページに上から順に表示されます。↑↓ で並べ替えできます。`,
           blocksEditor(draft, folder, true)]
       ]
     });
@@ -901,7 +927,7 @@
     if (wid) {
       // 保存バーより上に差し込む
       editor.insertBefore(h('section', { class: 'editor-section' },
-        h('h2', { class: 'editor-section-title' }, `この世界のキャラクター（${count} 人）`),
+        h('h2', { class: 'editor-section-title' }, `この${unit}のキャラクター（${count} 人）`),
         h('div', { class: 'btn-row' },
           (src.characters || []).map(c => h('a', { class: 'chip', href: `#char/${encodeURIComponent(wid)}/${encodeURIComponent(c.id)}` }, c.name)),
           h('a', { class: 'btn-small btn-add', href: `#new-char/${encodeURIComponent(wid)}` }, '＋ キャラクターを追加'))),
@@ -942,14 +968,17 @@
   /* ═══════════ その他の画面 ═══════════ */
   function welcome() {
     editor.innerHTML = '';
-    const chars = state.data.worlds.reduce((n, w) => n + (w.characters || []).length, 0);
+    const summary = CZ.ADDRESSES.map(a => {
+      const worlds = CZ.worldsIn(state.data, a.id);
+      const chars = worlds.reduce((n, w) => n + (w.characters || []).length, 0);
+      return h('li', {}, `${a.id}番地：${a.unit} ${worlds.length} 件・キャラクター ${chars} 人`);
+    });
     editor.append(h('div', { class: 'editor-head' },
       h('p', { class: 'editor-crumbs' }, 'ようこそ'),
       h('h1', { class: 'editor-title' }, '管理画面'),
+      h('ul', { class: 'tips' }, summary),
       h('p', { class: 'section-text' },
-        `世界 ${state.data.worlds.length} 件・キャラクター ${chars} 人が登録されています。`,
-        h('br'),
-        '左の一覧から編集したい世界やキャラクターを選ぶか、「＋」から追加してください。')),
+        '左の一覧から編集したい世界・都市やキャラクターを選ぶか、「＋」から追加してください。')),
       h('section', { class: 'editor-section' },
         h('h2', { class: 'editor-section-title' }, '使い方のメモ'),
         h('ul', { class: 'tips' },
@@ -957,6 +986,7 @@
           h('li', {}, 'このブラウザでは保存した内容がすぐに表示されます。'),
           h('li', {}, '画像は「画像をアップロード」を押すとすぐ GitHub に送られます。そのあと「保存する」でページに反映されます。'),
           h('li', {}, '文章では、行の先頭に「# 」で小見出し、**文字** で太字になります。'),
+          h('li', {}, '8626番地では「世界」、1086番地では「都市」と呼びます。世界・都市の編集画面の「番地」で、あとから移すこともできます。'),
           h('li', {}, 'ログイン中は、公開ページの右下に「このページを編集」ボタンが出ます。'),
           h('li', {}, 'Discord や X に貼るときは「共有用URLをコピー」の URL を使うと、キャラ名・紹介文・画像が埋め込み表示されます（保存のたびに自動で更新されます）。'))));
   }
@@ -994,24 +1024,35 @@
     if (!state.data) return;
     const current = location.hash.slice(1).split('/').map(decodeURIComponent);
     tree.innerHTML = '';
-    state.data.worlds.forEach((w, wi) => {
-      const chars = w.characters || [];
-      const worldActive = (current[0] === 'world' && current[1] === w.id);
-      tree.append(h('div', { class: 'tree-world' },
-        h('div', { class: `tree-row${worldActive ? ' is-active' : ''}` },
-          h('a', { class: 'tree-link tree-link-world', href: `#world/${encodeURIComponent(w.id)}` },
-            h('span', { class: 'tree-num' }, CZ.pad(wi + 1)), w.name || w.id),
-          moveBtns(state.data.worlds, wi, (a, b) => reorder(d => { [d.worlds[a], d.worlds[b]] = [d.worlds[b], d.worlds[a]]; }, '管理画面: 世界の並び順を変更'))),
-        h('ul', { class: 'tree-chars' },
-          chars.map((c, ci) => h('li', { class: `tree-row${current[0] === 'char' && current[1] === w.id && current[2] === c.id ? ' is-active' : ''}` },
-            h('a', { class: 'tree-link', href: `#char/${encodeURIComponent(w.id)}/${encodeURIComponent(c.id)}` }, c.name || c.id),
-            moveBtns(chars, ci, (a, b) => reorder(d => {
-              const list = CZ.findWorld(d, w.id).characters;
-              [list[a], list[b]] = [list[b], list[a]];
-            }, `管理画面: 「${w.name}」のキャラクターの並び順を変更`))))),
-        h('a', { class: `tree-add${current[0] === 'new-char' && current[1] === w.id ? ' is-active' : ''}`, href: `#new-char/${encodeURIComponent(w.id)}` }, '＋ キャラクターを追加')));
+    CZ.ADDRESSES.forEach(a => {
+      const worlds = CZ.worldsIn(state.data, a.id);
+      tree.append(h('div', { class: `tree-addr tree-addr-${a.id}` },
+        h('span', { class: 'tree-addr-name' }, `${a.id}番地`, h('small', {}, a.unitEnPlural)),
+        h('a', { class: `btn-small${current[0] === 'new-world' && current[1] === a.id ? ' is-on' : ''}`, href: `#new-world/${a.id}` }, `＋ ${a.unit}を追加`)));
+      worlds.forEach((w, wi) => {
+        const chars = w.characters || [];
+        const worldActive = (current[0] === 'world' && current[1] === w.id);
+        tree.append(h('div', { class: 'tree-world' },
+          h('div', { class: `tree-row${worldActive ? ' is-active' : ''}` },
+            h('a', { class: 'tree-link tree-link-world', href: `#world/${encodeURIComponent(w.id)}` },
+              h('span', { class: 'tree-num' }, CZ.pad(wi + 1)), w.name || w.id),
+            // 並べ替えは同じ番地の中で入れ替える
+            moveBtns(worlds, wi, (x, y) => reorder(d => {
+              const ix = d.worlds.findIndex(v => v.id === worlds[x].id);
+              const iy = d.worlds.findIndex(v => v.id === worlds[y].id);
+              [d.worlds[ix], d.worlds[iy]] = [d.worlds[iy], d.worlds[ix]];
+            }, `管理画面: ${a.id}番地の${a.unit}の並び順を変更`))),
+          h('ul', { class: 'tree-chars' },
+            chars.map((c, ci) => h('li', { class: `tree-row${current[0] === 'char' && current[1] === w.id && current[2] === c.id ? ' is-active' : ''}` },
+              h('a', { class: 'tree-link', href: `#char/${encodeURIComponent(w.id)}/${encodeURIComponent(c.id)}` }, c.name || c.id),
+              moveBtns(chars, ci, (x, y) => reorder(d => {
+                const list = CZ.findWorld(d, w.id).characters;
+                [list[x], list[y]] = [list[y], list[x]];
+              }, `管理画面: 「${w.name}」のキャラクターの並び順を変更`))))),
+          h('a', { class: `tree-add${current[0] === 'new-char' && current[1] === w.id ? ' is-active' : ''}`, href: `#new-char/${encodeURIComponent(w.id)}` }, '＋ キャラクターを追加')));
+      });
+      if (!worlds.length) tree.append(h('p', { class: 'field-help tree-empty' }, `まだ${a.unit}がありません。`));
     });
-    if (!state.data.worlds.length) tree.append(h('p', { class: 'field-help' }, 'まだ世界がありません。'));
   }
 
   /* ═══════════ はじめに ═══════════ */

@@ -34,6 +34,16 @@
   --sc-near: #5a6084;
   --sc-window: #fff6dc;
 
+  /* 空のグラデーション・夜景の明かり */
+  --sky-1: #e7e9f2;
+  --sky-2: #efece8;
+  --sky-3: #f4ebe2;
+  --hero-sky: #f1ece4;
+  --lamp: #f2c66b;
+  --moon: #fffaf0;
+  --shu-tint: rgba(200, 68, 46, 0.04);
+  --shu-ring: rgba(200, 68, 46, 0.35);
+
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-pill: 999px;
@@ -50,6 +60,114 @@
 
   /* 鳥居マーク（見出しの頭に付く） */
   --torii-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M0 1.2Q12 3.6 24 1.2L23.6 4Q12 6.4 .4 4z M2.5 6h19v1.8h-19z M2.5 9.5h19v1.8h-19z M5 6h2.4v14H5z M16.6 6H19v14h-2.4z M11 7.8h2v1.7h-2z'/%3E%3C/svg%3E");
+}
+
+/* ═══════════════════════════════════════════
+   1086番地：青を基調にしたテーマ
+   （<html data-address="1086"> のときに色だけを入れ替える）
+   ═══════════════════════════════════════════ */
+:root[data-address="1086"] {
+  --bg: #f1f5fa;
+  --bg-card: #fbfdff;
+  --bg-surface: #e1e9f3;
+  --ink: #13233f;
+  --ink-soft: rgba(19, 35, 63, 0.72);
+  --muted: #7d8aa0;
+  --line: #c6d3e3;
+  --line-soft: #dbe4ef;
+  --dark: #0f1f3a;
+  --on-dark: #eef4fb;
+
+  --shu: #2678d4;   /* 1086番地では空色の青がアクセント */
+  --ai: #0e3a78;
+  --kin: #35b3d1;
+  --take: #4f5fc9;
+
+  --tag-shu: #2470c4;
+  --tag-ai: #12397a;
+  --tag-kin: #0d869e;
+  --tag-take: #4d58c2;
+
+  --sc-far: #d0dcee;
+  --sc-mid: #93acd2;
+  --sc-near: #34507f;
+  --sc-window: #e2f3ff;
+
+  --sky-1: #dbe5f4;
+  --sky-2: #e5edf7;
+  --sky-3: #ebf2f9;
+  --hero-sky: #e6eef8;
+  --lamp: #8fd8ff;
+  --moon: #f4fbff;
+  --shu-tint: rgba(38, 120, 212, 0.05);
+  --shu-ring: rgba(38, 120, 212, 0.35);
+
+  /* 見出しの頭のマーク：鳥居の代わりにビル群 */
+  --torii-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M1 8h6v12H1z M9 3h6v17H9z M11.4 0h1.2v3h-1.2z M17 6h6v14h-6z'/%3E%3C/svg%3E");
+}
+
+/* 番地を切り替えたときに色がふわっと変わるように */
+body, .site-header, .kv, .detail-hero, .site-footer, .marquee {
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+/* ─── 番地スイッチ ─── */
+.addr-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  gap: 2px;
+}
+
+.addr-switch button {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0.38rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.addr-switch button:hover { color: var(--ink); }
+.addr-switch button[aria-pressed="true"] { background: var(--dark); color: var(--on-dark); }
+
+/* トップページの大きいスイッチ */
+.addr-switch-lg {
+  margin-top: 1.6rem;
+  padding: 4px;
+  box-shadow: 0 6px 18px rgba(20, 30, 60, 0.08);
+}
+
+.addr-switch-lg button {
+  font-family: var(--font-serif);
+  font-style: normal;
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  letter-spacing: 0.06em;
+}
+
+.addr-switch-lg button small {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-left: 0.4rem;
+  opacity: 0.75;
+}
+
+.kv-switch-wrap { --split-delay: 0s; animation: fadeUp 0.8s var(--ease) 1.6s both; }
+
+@media (max-width: 560px) {
+  .site-header .addr-switch button { padding: 0.32rem 0.55rem; font-size: 0.85rem; }
+  .addr-switch-lg button { padding: 0.55rem 0.9rem; font-size: 0.92rem; }
+  .addr-switch-lg button small { display: none; }
 }
 
 html { font-size: 16px; scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 1rem); }
@@ -276,7 +394,8 @@ button { font: inherit; color: inherit; }
 .scene .stairs { fill: var(--sc-mid); }
 .scene .stair-line { stroke: var(--sc-near); stroke-width: 1.2; opacity: 0.45; }
 
-.scene .moon { fill: #fffaf0; filter: drop-shadow(0 0 18px rgba(255, 236, 200, 0.9)); }
+.scene .moon { fill: var(--moon); filter: drop-shadow(0 0 18px rgba(255, 236, 200, 0.9)); }
+.scene .ring { fill: none; stroke: var(--shu); stroke-width: 3; opacity: 0.75; }
 
 /* 月を囲む光輪（ゆっくり回転） */
 .scene .halo {
@@ -368,7 +487,7 @@ button { font: inherit; color: inherit; }
   min-height: min(94vh, 860px);
   padding: clamp(3rem, 11vh, 7.5rem) var(--gutter) 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--bg) 0%, #e7e9f2 22%, #efece8 50%, #f4ebe2 78%, var(--bg) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--sky-1) 22%, var(--sky-2) 50%, var(--sky-3) 78%, var(--bg) 100%);
 }
 
 .kv-inner {
@@ -908,7 +1027,7 @@ button { font: inherit; color: inherit; }
   padding: 2.5rem var(--gutter) calc(clamp(90px, 13vw, 180px) + 1.5rem);
   margin-top: -3rem;
   padding-top: 5.5rem;
-  background: linear-gradient(180deg, transparent 0%, #f1ece4 70%, var(--bg) 100%);
+  background: linear-gradient(180deg, transparent 0%, var(--hero-sky) 70%, var(--bg) 100%);
 }
 
 /* 詳細ページのヒーロー下に敷くシルエットの帯 */
@@ -1294,7 +1413,7 @@ button { font: inherit; color: inherit; }
   transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
-.relation-item:hover { padding-left: 0.9rem; background: rgba(200, 68, 46, 0.04); }
+.relation-item:hover { padding-left: 0.9rem; background: var(--shu-tint); }
 .relation-item:hover::after { background: var(--shu); border-color: var(--shu); color: #fff; }
 
 .relation-thumb {
@@ -1304,7 +1423,7 @@ button { font: inherit; color: inherit; }
   object-fit: cover;
   flex-shrink: 0;
   background: var(--bg-surface);
-  box-shadow: 0 0 0 1px var(--line), 0 0 0 4px var(--bg), 0 0 0 5px rgba(200, 68, 46, 0.35);
+  box-shadow: 0 0 0 1px var(--line), 0 0 0 4px var(--bg), 0 0 0 5px var(--shu-ring);
   color: transparent; /* 画像がないときの alt テキストを隠す */
   overflow: hidden;
 }
@@ -1366,7 +1485,7 @@ button { font: inherit; color: inherit; }
 .footer-scenery .scene-near { fill: var(--dark); }
 .footer-scenery .stairs     { fill: var(--dark); }
 .footer-scenery .stair-line { stroke: var(--on-dark); opacity: 0.15; }
-.footer-scenery .win        { fill: #f2c66b; opacity: 0.9; }
+.footer-scenery .win        { fill: var(--lamp); opacity: 0.9; }
 
 .footer-inner {
   max-width: var(--page-width);
@@ -1402,7 +1521,7 @@ button { font: inherit; color: inherit; }
   opacity: 0.85;
 }
 
-.footer-nav a:hover { opacity: 1; color: #f2c66b; }
+.footer-nav a:hover { opacity: 1; color: var(--lamp); }
 
 .footer-copy {
   max-width: var(--page-width);
@@ -1435,7 +1554,7 @@ button { font: inherit; color: inherit; }
 
 .admin-bar-label {
   padding: 0.3rem 0.6rem;
-  color: #f2c66b;
+  color: var(--lamp);
   font-weight: 700;
 }
 

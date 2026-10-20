@@ -22,8 +22,81 @@
 
   CZ.pad = n => String(n).padStart(2, '0');
 
-  CZ.worldUrl = id => `world.html?id=${encodeURIComponent(id)}`;
-  CZ.charUrl = (wid, cid) => `character.html?world=${encodeURIComponent(wid)}&id=${encodeURIComponent(cid)}`;
+  /* ─── 番地（8626番地 / 1086番地） ───
+     世界・都市はどれか1つの番地に属する（worlds.json の "address"。未設定なら 8626番地）。
+     1086番地では「世界」を「都市」と呼び、青を基調にした見た目になる（style.css の
+     :root[data-address="1086"]、背景の絵は site.js の city 版） */
+  CZ.ADDRESSES = [
+    { id: '8626', kanji: '八六二六', unit: '世界', unitEn: 'World', unitEnPlural: 'Worlds', eyebrow: 'World Setting', themeColor: '#c8442e' },
+    { id: '1086', kanji: '一〇八六', unit: '都市', unitEn: 'City', unitEnPlural: 'Cities', eyebrow: 'City Setting', themeColor: '#2678d4' }
+  ];
+  CZ.DEFAULT_ADDRESS = CZ.ADDRESSES[0].id;
+  CZ.address = id => CZ.ADDRESSES.find(a => a.id === id) || CZ.ADDRESSES[0];
+  CZ.worldAddress = w => (w && CZ.ADDRESSES.some(a => a.id === w.address)) ? w.address : CZ.DEFAULT_ADDRESS;
+  CZ.worldsIn = (data, addr) => (data.worlds || []).filter(w => CZ.worldAddress(w) === addr);
+  // いま表示している番地（site.js がページの読み込み時に <html data-address> に入れている）
+  CZ.currentAddress = () => CZ.address(document.documentElement.dataset.address).id;
+
+  // URL の末尾に番地を付ける（8626番地のときは付けない）
+  const addrParam = (addr, first) => (addr && addr !== CZ.DEFAULT_ADDRESS ? `${first ? '?' : '&'}addr=${addr}` : '');
+  CZ.indexUrl = (addr, hash = '') => `index.html${addrParam(addr, true)}${hash}`;
+  CZ.worldUrl = (id, addr) => `world.html?id=${encodeURIComponent(id)}${addrParam(addr)}`;
+  CZ.charUrl = (wid, cid, addr) => `character.html?world=${encodeURIComponent(wid)}&id=${encodeURIComponent(cid)}${addrParam(addr)}`;
+
+  /* 番地ごとに変わる文言。data-addr-text="キー" を付けた要素の文字が入れ替わる */
+  CZ.addressTexts = addr => {
+    const a = CZ.address(addr);
+    return {
+      logo: a.id,
+      kvSub: `${a.id}番地 ― Uchinoko Archive`,
+      kvVertical: `彼方ノ世界　${a.kanji}番地`,
+      navWorlds: a.unitEnPlural,
+      worldsLabel: a.unitEnPlural,
+      worldsLead: `${a.unit}を、えらぶ。`,
+      worldsText: `${a.unit}を選択すると、その${a.unit}に生きるキャラクターたちが表示されます。`,
+      charsLead: `その${a.unit}に、生きるひとびと。`,
+      footerLogo: a.id,
+      footerTitle: `彼方の世界(${a.id}番地) 設定資料集`
+    };
+  };
+
+  /* 番地を切り替える：配色・背景の絵・文言・リンクを入れ替える */
+  CZ.applyAddress = addr => {
+    addr = CZ.address(addr).id;
+    if (window.applyAddressTheme) window.applyAddressTheme(addr);
+    const texts = CZ.addressTexts(addr);
+    let changed = false;
+    document.querySelectorAll('[data-addr-text]').forEach(el => {
+      const v = texts[el.dataset.addrText];
+      if (v == null || el.dataset.addrValue === v) return;
+      el.dataset.addrValue = v;
+      if (el.dataset.splitDone) {
+        // 1文字ずつのアニメーションをかけ直す
+        delete el.dataset.splitDone;
+        el.classList.remove('split', 'is-in');
+        changed = true;
+      }
+      el.textContent = v;
+    });
+    // 他のページから一覧へ戻るリンクにも番地を付ける
+    document.querySelectorAll('[data-addr-link]').forEach(el => { el.href = CZ.indexUrl(addr, el.dataset.addrLink); });
+    document.querySelectorAll('.addr-switch [data-addr]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.addr === addr)));
+    if (changed && window.animateIn) window.animateIn(document);
+    return addr;
+  };
+
+  /* 番地スイッチ（ボタンに data-addr）。onSwitch がなければトップページへ移動する */
+  CZ.bindAddressSwitch = onSwitch => {
+    document.querySelectorAll('.addr-switch [data-addr]').forEach(b => b.addEventListener('click', () => {
+      const addr = b.dataset.addr;
+      if (addr === CZ.currentAddress() && onSwitch) return;
+      if (onSwitch) onSwitch(addr);
+      else {
+        try { localStorage.setItem('cz-address', addr); } catch (e) { /* 保存できなくても移動はする */ }
+        location.href = CZ.indexUrl(addr);
+      }
+    }));
+  };
 
   CZ.findWorld = (data, wid) => (data.worlds || []).find(w => w.id === wid) || null;
   CZ.findChar = (data, wid, cid) => {
@@ -95,18 +168,20 @@
     const title = c ? c.name : w.name;
     const desc = oneLine(c
       ? c.short_description || c.catch || `${w.name} のキャラクター`
-      : w.description || w.catch || `${w.name} の世界設定`, 160);
+      : w.description || w.catch || `${w.name} の${CZ.address(CZ.worldAddress(w)).unit}設定`, 160);
     const img = c ? c.thumbnail || c.image : w.banner || w.thumbnail;
     const root = cid ? '../../' : '../';
-    const target = c ? CZ.charUrl(wid, cid) : CZ.worldUrl(wid);
+    const addr = CZ.address(CZ.worldAddress(w));
+    const target = c ? CZ.charUrl(wid, cid, addr.id) : CZ.worldUrl(wid, addr.id);
+    const fallbackImage = addr.id === CZ.DEFAULT_ADDRESS ? 'assets/brand/og-image.png' : `assets/brand/og-image-${addr.id}.png`;
     const e = CZ.esc;
     const image = img
       ? `  <meta property="og:image" content="${e(absUrl(img))}" />
   <meta property="og:image:alt" content="${e(c ? `${title}のイラスト` : title)}" />`
-      : `  <meta property="og:image" content="${e(absUrl('assets/brand/og-image.png'))}" />
+      : `  <meta property="og:image" content="${e(absUrl(fallbackImage))}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="城・神社と鳥居・大都市のシルエットに「彼方の世界、設定資料集。」の文字" />`;
+  <meta property="og:image:alt" content="${addr.id === CZ.DEFAULT_ADDRESS ? '城・神社と鳥居・大都市' : '夜の大都市と塔'}のシルエットに「彼方の世界、設定資料集。」の文字" />`;
     return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -118,7 +193,7 @@
   <link rel="icon" href="${root}favicon.ico" sizes="any" />
   <link rel="icon" href="${root}assets/brand/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="${root}assets/brand/apple-touch-icon.png" />
-  <meta name="theme-color" content="#c8442e" />
+  <meta name="theme-color" content="${addr.themeColor}" />
   <meta name="description" content="${e(desc)}" />
   <meta property="og:type" content="${c ? 'profile' : 'website'}" />
   <meta property="og:site_name" content="${SITE_NAME}" />
